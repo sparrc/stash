@@ -16,7 +16,9 @@ import (
 // The order here is the order in which they are printed
 // by 'stash help'.
 var commands = []*cmds.Command{
-//cmdAdd,
+	cmds.Add,
+	cmds.List,
+	cmds.Daemon,
 }
 
 func main() {

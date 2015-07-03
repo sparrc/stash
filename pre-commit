@@ -50,7 +50,7 @@ then
     exit 1
 fi
 
-go fmt >/dev/null 2>&1
+go fmt && go fmt ./cmds >/dev/null 2>&1
 if [ $? -ne 0 ]
 then
     echo "Failed to run go fmt. This shouldn't happen. Please"

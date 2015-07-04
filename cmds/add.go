@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"github.com/cameronsparr/stash/config"
+	"github.com/cameronsparr/stash/destination"
 )
 
 var Add = &Command{
@@ -32,9 +35,15 @@ func runAddDestination(args []string) {
 	fmt.Println("Which type of backup destination would you like to add?")
 	fmt.Println("	1. Amazon (S3 or Glacier)")
 	fmt.Println("	2. Google Cloud")
-	fmt.Print("[1-2]: ")
+	fmt.Println("")
+	fmt.Print("Choose an option [1-2]: ")
 	text, _ := reader.ReadString('\n')
 	log.Println(text)
+
+	// TODO: Actually do the configuration
+	configFile := config.NewConfigFile()
+	awsDest := destination.AmazonDestination{DestinationName: "AWS"}
+	configFile.AddDestination(&awsDest)
 }
 
 func runAddFolder(args []string) {

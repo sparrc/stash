@@ -13,10 +13,13 @@ type ConfigFile struct {
 	FileName string
 }
 
-func (self *ConfigFile) SetDefaults() {
-	self.FileName = "$HOME/.stash/config.json"
+func NewConfigFile() *ConfigFile {
+	return &ConfigFile{FileName: "$HOME/.stash/config.json"}
 }
 
 func (self *ConfigFile) AddDestination(dest destination.Destination) {
-	fmt.Println(dest.Name())
+	fmt.Fprintf(os.Stdout,
+		"Adding destination [%s] to config file [%s]\n",
+		dest.Name(),
+		self.FileName)
 }

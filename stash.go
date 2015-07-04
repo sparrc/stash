@@ -59,7 +59,7 @@ Usage:
 
 The commands are:
 {{range .}}
-    {{.Name | printf "%-8s"}} {{.Short}}{{end}}
+    {{.Name | printf "%-8s"}}	{{.Short}}{{end}}
 
 Use "stash help [command]" for more information about a command.
 `

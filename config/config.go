@@ -3,8 +3,6 @@ package config
 import (
 	"fmt"
 	"os"
-
-	"github.com/cameronsparr/stash/destination"
 )
 
 // Config deals with the stash configuration file ONLY
@@ -13,11 +11,15 @@ type Config struct {
 	FileName string
 }
 
+type ConfigFile struct {
+	Destinations []Destination
+}
+
 func NewConfig() *Config {
 	return &Config{FileName: "$HOME/.stash/config.json"}
 }
 
-func (self *Config) AddDestination(dest destination.Destination) {
+func (self *Config) AddDestination(dest Destination) {
 	fmt.Fprintf(os.Stdout,
 		"Adding destination [%s] to config file [%s]\n",
 		dest.Name(),

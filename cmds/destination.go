@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/cameronsparr/stash/config"
-	"github.com/cameronsparr/stash/destination"
 )
 
 var Destination = &Command{
@@ -44,7 +43,7 @@ func runAdd(args []string) {
 
 	// TODO: Actually do the configuration
 	conf := config.NewConfig()
-	awsDest := destination.AmazonDestination{DestinationName: "AWS"}
+	awsDest := config.AmazonDestination{DestinationName: "AWS"}
 	conf.AddDestination(&awsDest)
 }
 

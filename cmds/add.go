@@ -25,25 +25,21 @@ func runAdd(cmd *Command, args []string) {
 	} else if args[0] == "folder" {
 		runAddFolder(args)
 	}
-
 }
 
 func runAddDestination(args []string) {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print(`
-Which type of backup destination would you like to add?
-	1. Amazon
-	2. Google Cloud
-`)
+	fmt.Println("Which type of backup destination would you like to add?")
+	fmt.Println("	1. Amazon (S3 or Glacier)")
+	fmt.Println("	2. Google Cloud")
+	fmt.Print("[1-2]: ")
 	text, _ := reader.ReadString('\n')
-	fmt.Println(text)
+	log.Println(text)
 }
 
 func runAddFolder(args []string) {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print(`
-This is not implemented yet, but do you love marutaro? [Y/y]
-`)
+	fmt.Print("This is not implemented yet, but do you love marutaro? [Y/y]")
 	text, _ := reader.ReadString('\n')
 	fmt.Println(text)
 }

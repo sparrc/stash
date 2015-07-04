@@ -16,8 +16,8 @@ import (
 // The order here is the order in which they are printed
 // by 'stash help'.
 var commands = []*cmds.Command{
-	cmds.Add,
-	cmds.List,
+	cmds.Destination,
+	cmds.Folder,
 	cmds.Daemon,
 }
 

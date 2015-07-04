@@ -1,7 +1,7 @@
 package cmds
 
 import (
-	"fmt"
+//	"fmt"
 )
 
 var Daemon = &Command{
@@ -14,5 +14,5 @@ Control the stash daemon process.
 }
 
 func runDaemon(cmd *Command, args []string) {
-	fmt.Println("Running Daemon Command")
+	cmd.UsageExit()
 }

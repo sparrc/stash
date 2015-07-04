@@ -7,17 +7,17 @@ import (
 	"github.com/cameronsparr/stash/destination"
 )
 
-// ConfigFile deals with the stash configuration file ONLY
-type ConfigFile struct {
-	// Name of the confiuration file.
+// Config deals with the stash configuration file ONLY
+type Config struct {
+	// Name of the configuration file.
 	FileName string
 }
 
-func NewConfigFile() *ConfigFile {
-	return &ConfigFile{FileName: "$HOME/.stash/config.json"}
+func NewConfig() *Config {
+	return &Config{FileName: "$HOME/.stash/config.json"}
 }
 
-func (self *ConfigFile) AddDestination(dest destination.Destination) {
+func (self *Config) AddDestination(dest destination.Destination) {
 	fmt.Fprintf(os.Stdout,
 		"Adding destination [%s] to config file [%s]\n",
 		dest.Name(),

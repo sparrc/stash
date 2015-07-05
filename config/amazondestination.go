@@ -18,7 +18,7 @@ func (self *AmazonDestination) Type() string {
 	return "AmazonDestination"
 }
 
-func (self *AmazonDestination) Credentials() interface{} {
+func (self *AmazonDestination) Credentials() map[string]string {
 	return map[string]string{
 		"key":   self.AWSAccessKey,
 		"keyID": self.AWSAccessKeyID,

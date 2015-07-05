@@ -20,7 +20,6 @@ Add, list, or remove backup destinations.
 
 func runDestination(cmd *Command, args []string) {
 	if len(args) == 0 {
-		log.Println("destination requires one of [add | list | remove]")
 		cmd.UsageExit()
 	} else if args[0] == "add" {
 		runAdd(args)
@@ -45,6 +44,7 @@ func runAdd(args []string) {
 	conf := config.NewConfig()
 	awsDest := config.AmazonDestination{DestinationName: "AWS"}
 	conf.AddDestination(&awsDest)
+	conf.LoadConfigFile()
 }
 
 func runList(args []string) {

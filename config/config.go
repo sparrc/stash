@@ -54,7 +54,7 @@ func (cm *Mngr) AddDestination(configEntry Entry) {
 		cm.FileName)
 
 	allConfigEntries := cm.GetNewConfigEntries(configEntry)
-	JSON := cm.JSONMarshallEntry(allConfigEntries)
+	JSON := cm.ToJSON(allConfigEntries)
 	ioutil.WriteFile(cm.FileName, JSON, 0644)
 }
 
@@ -77,8 +77,8 @@ func (cm *Mngr) GetNewConfigEntries(newEntry Entry) []Entry {
 	return configFile
 }
 
-// JSONMarshallEntry marshalls a config.Entry into JSON
-func (cm *Mngr) JSONMarshallEntry(configEntries []Entry) []byte {
+// ToJSON marshalls a config.Entry into JSON
+func (cm *Mngr) ToJSON(configEntries []Entry) []byte {
 	JSON, err := json.MarshalIndent(configEntries, "", "  ")
 	if err != nil {
 		panic(err)

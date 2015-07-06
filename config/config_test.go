@@ -81,7 +81,7 @@ func TestJSONMarshall(t *testing.T) {
 ]
 `
 	configMngr := Mngr{FileName: testConfFile}
-	testStr := configMngr.JSONMarshallEntry(testConfig)
+	testStr := configMngr.ToJSON(testConfig)
 	if strings.Trim(string(testStr), " \n") != strings.Trim(expectStr, " \n") {
 		t.Errorf("\nEXPECTED\n%s\nGOT\n%s",
 			expectStr,

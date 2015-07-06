@@ -51,13 +51,32 @@ func runAdd(args []string) {
 func addAmazon() {
 	// TODO: implement
 	conf := config.NewConfigMngr()
+	reader := bufio.NewReader(os.Stdin)
 	confEntry := config.Entry{
-		Name:        "FooBar",
-		Folders:     []string{"/tmp/foo", "/tmp/bar"},
+		Name:        getName(reader),
+		Folders:     getFolders(reader),
 		Type:        "Amazon",
-		Credentials: map[string]string{"key": "supersecret"},
+		Credentials: getCredentials(reader),
 	}
 	conf.AddDestination(confEntry)
+}
+
+func getName(reader *bufio.Reader) string {
+	// TODO: check if user is trying to add a duplicate destination
+	fmt.Print("Specify a name for this destination: ")
+	text, _ := reader.ReadString('\n')
+	return strings.TrimSpace(text)
+}
+
+func getFolders(reader *bufio.Reader) []string {
+	// TODO: check that folders are valid
+	fmt.Print("Specify directories to backup (space-separated): ")
+	text, _ := reader.ReadString('\n')
+	return strings.Split(strings.TrimSpace(text), " ")
+}
+
+func getCredentials(reader *bufio.Reader) map[string]string {
+	return map[string]string{"key": "supersecret"}
 }
 
 func runList(args []string) {

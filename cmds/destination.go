@@ -3,8 +3,8 @@ package cmds
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
+	"strings"
 
 	"github.com/cameronsparr/stash/config"
 )
@@ -38,13 +38,25 @@ func runAdd(args []string) {
 	fmt.Println("")
 	fmt.Print("Choose an option [1-2]: ")
 	text, _ := reader.ReadString('\n')
-	log.Println(text)
+	text = strings.TrimSpace(text)
+	switch text {
+	case "1":
+		addAmazon()
+	case "2":
+		return
+	}
+}
 
-	// TODO: Actually do the configuration
+func addAmazon() {
+	// TODO: implement
 	conf := config.NewConfig()
-	awsDest := config.AmazonDestination{DestinationName: "AWS"}
-	conf.AddDestination(&awsDest)
-	conf.LoadConfigFile()
+	confEntry := config.ConfigEntry{
+		Name:        "FooBar",
+		Folders:     []string{"/tmp/foo", "/tmp/bar"},
+		Type:        "Amazon",
+		Credentials: map[string]string{"key": "supersecret"},
+	}
+	conf.AddDestination(confEntry)
 }
 
 func runList(args []string) {

@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 )
 
-const fileName = "~/.stash/config.json"
-
 // Config deals with the stash configuration file
 type Config struct {
 	// Name of the configuration file.
@@ -26,9 +24,10 @@ type ConfigEntry struct {
 }
 
 func NewConfig() *Config {
-	config := Config{FileName: fileName}
+	filename := filepath.Join(os.Getenv("HOME"), ".stash", "config.json")
+	config := Config{FileName: filename}
 	// Create config file if it doesn't exist:
-	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		config.createConfigFile()
 	}
 	return &config
@@ -45,11 +44,18 @@ func (self *Config) createConfigFile() {
 	}
 }
 
-func (self *Config) AddDestination(dest Destination) {
+func (self *Config) AddDestination(configEntry ConfigEntry) {
+	// TODO: implement
 	fmt.Fprintf(os.Stdout,
 		"Adding destination [%s] to config file [%s]\n",
-		dest.Name(),
+		configEntry.Name,
 		self.FileName)
+
+	jsonEntry, err := json.MarshalIndent(configEntry, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	ioutil.WriteFile(self.FileName, jsonEntry, 0644)
 }
 
 func (self *Config) LoadConfigFile() {
@@ -58,8 +64,8 @@ func (self *Config) LoadConfigFile() {
 	if err != nil {
 		panic(err)
 	}
-	var entry ConfigEntry
-	if err := json.Unmarshal(content, &entry); err != nil {
+	var entries []ConfigEntry
+	if err := json.Unmarshal(content, &entries); err != nil {
 		panic(err)
 	}
 }

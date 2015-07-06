@@ -50,12 +50,9 @@ func (cm *ConfigMngr) AddDestination(configEntry ConfigEntry) {
 		configEntry.Name,
 		cm.FileName)
 
-	newConfig := cm.GetNewConfigEntries(configEntry)
-	newJSON, err := json.MarshalIndent(newConfig, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	ioutil.WriteFile(cm.FileName, newJSON, 0644)
+	allConfigEntries := cm.GetNewConfigEntries(configEntry)
+	JSON := cm.JSONMarshallEntry(allConfigEntries)
+	ioutil.WriteFile(cm.FileName, JSON, 0644)
 }
 
 // This function takes a new config entry, loads previous entries, and combines
@@ -63,6 +60,14 @@ func (cm *ConfigMngr) GetNewConfigEntries(configEntry ConfigEntry) []ConfigEntry
 	configFile := cm.LoadConfigFile()
 	configFile = append(configFile, configEntry)
 	return configFile
+}
+
+func (cm *ConfigMngr) JSONMarshallEntry(configEntries []ConfigEntry) []byte {
+	JSON, err := json.MarshalIndent(configEntries, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return JSON
 }
 
 func (cm *ConfigMngr) LoadConfigFile() []ConfigEntry {

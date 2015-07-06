@@ -4,20 +4,29 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
+func getConfigEntry() ConfigEntry {
+	return ConfigEntry{
+		Name:        "FooBar",
+		Folders:     []string{"/tmp/foo", "/tmp/bar"},
+		Type:        "Amazon",
+		Credentials: map[string]string{"key": "supersecret", "keyID": "123"},
+	}
+}
+
+func getConfFile() string {
+	wd, _ := os.Getwd()
+	return filepath.Join(wd, "config_test.json")
+}
+
 // Test loading the test config file
 func TestLoad(t *testing.T) {
-	wd, _ := os.Getwd()
-	testConfFile := filepath.Join(wd, "config_test.json")
+	testConfFile := getConfFile()
 	expectConfig := []ConfigEntry{
-		ConfigEntry{
-			Name:        "FooBar",
-			Folders:     []string{"/tmp/foo", "/tmp/bar"},
-			Type:        "Amazon",
-			Credentials: map[string]string{"key": "supersecret", "keyID": "123"},
-		},
+		getConfigEntry(),
 	}
 	configMngr := ConfigMngr{FileName: testConfFile}
 	fileConfig := configMngr.LoadConfigFile()
@@ -30,8 +39,7 @@ func TestLoad(t *testing.T) {
 
 // Test that function properly loads previous configs and adds new config
 func TestAdd(t *testing.T) {
-	wd, _ := os.Getwd()
-	testConfFile := filepath.Join(wd, "config_test.json")
+	testConfFile := getConfFile()
 	newEntry := ConfigEntry{
 		Name:        "Wahoo",
 		Folders:     []string{"/home"},
@@ -39,12 +47,7 @@ func TestAdd(t *testing.T) {
 		Credentials: map[string]string{"apikey": "12345"},
 	}
 	expectConfig := []ConfigEntry{
-		ConfigEntry{
-			Name:        "FooBar",
-			Folders:     []string{"/tmp/foo", "/tmp/bar"},
-			Type:        "Amazon",
-			Credentials: map[string]string{"key": "supersecret", "keyID": "123"},
-		},
+		getConfigEntry(),
 		newEntry,
 	}
 	configMngr := ConfigMngr{FileName: testConfFile}
@@ -53,6 +56,36 @@ func TestAdd(t *testing.T) {
 		t.Errorf("EXPECTED %s GOT %s",
 			expectConfig,
 			newConfig)
+	}
+}
+
+// Test JSON marshalling a config entry
+func TestJSONMarshall(t *testing.T) {
+	testConfFile := getConfFile()
+	testConfig := []ConfigEntry{
+		getConfigEntry(),
+	}
+	expectStr := `[
+  {
+    "Name": "FooBar",
+    "Folders": [
+      "/tmp/foo",
+      "/tmp/bar"
+    ],
+    "Type": "Amazon",
+    "Credentials": {
+      "key": "supersecret",
+      "keyID": "123"
+    }
+  }
+]
+`
+	configMngr := ConfigMngr{FileName: testConfFile}
+	testStr := configMngr.JSONMarshallEntry(testConfig)
+	if strings.Trim(string(testStr), " \n") != strings.Trim(expectStr, " \n") {
+		t.Errorf("\nEXPECTED\n%s\nGOT\n%s",
+			expectStr,
+			testStr)
 	}
 }
 

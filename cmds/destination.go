@@ -2,7 +2,9 @@ package cmds
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -22,11 +24,13 @@ Add, list, or remove backup destinations.
 func runDestination(cmd *Command, args []string) {
 	if len(args) == 0 {
 		cmd.UsageExit()
-	} else if args[0] == "add" {
+	}
+	switch args[0] {
+	case "add":
 		runAdd(args)
-	} else if args[0] == "list" {
+	case "list":
 		runList(args)
-	} else if args[0] == "remove" {
+	case "remove":
 		runRemove(args)
 	}
 }
@@ -50,29 +54,55 @@ func runAdd(args []string) {
 
 func addAmazon() {
 	// TODO: implement
-	conf := config.NewConfigMngr()
+	confMngr := config.NewMngr()
 	reader := bufio.NewReader(os.Stdin)
 	confEntry := config.Entry{
-		Name:        getName(reader),
+		Name:        getName(reader, confMngr),
 		Folders:     getFolders(reader),
 		Type:        "Amazon",
 		Credentials: getCredentials(reader),
 	}
-	conf.AddDestination(confEntry)
+	confMngr.AddDestination(confEntry)
 }
 
-func getName(reader *bufio.Reader) string {
+func getName(reader *bufio.Reader, confMngr *config.Mngr) string {
 	// TODO: check if user is trying to add a duplicate destination
 	fmt.Print("Specify a name for this destination: ")
 	text, _ := reader.ReadString('\n')
-	return strings.TrimSpace(text)
+	name := strings.TrimSpace(text)
+	if confMngr.IsDuplicateEntry(config.Entry{Name: name}) {
+		log.Fatalf("Attempted to add duplicate entry [%s], if you were "+
+			"trying to add folders to an existing backup destination, use "+
+			"'stash folder add'",
+			name)
+	}
+	return name
 }
 
 func getFolders(reader *bufio.Reader) []string {
-	// TODO: check that folders are valid
 	fmt.Print("Specify directories to backup (space-separated): ")
 	text, _ := reader.ReadString('\n')
-	return strings.Split(strings.TrimSpace(text), " ")
+	dirs := strings.Split(strings.TrimSpace(text), " ")
+	// Check that folders are valid and accessible
+	for _, dir := range dirs {
+		if _, err := isValidDirectory(dir); err != nil {
+			log.Fatalln(err)
+		}
+	}
+	return dirs
+}
+
+func isValidDirectory(dir string) (bool, error) {
+	if _, err := os.Stat(dir); err != nil {
+		if os.IsNotExist(err) {
+			e := fmt.Sprintf("Directory %s does not exist", dir)
+			return false, errors.New(e)
+		} else {
+			e := fmt.Sprintf("Error accessing %s, do you have permission to read?", dir)
+			return false, errors.New(e)
+		}
+	}
+	return true, nil
 }
 
 func getCredentials(reader *bufio.Reader) map[string]string {

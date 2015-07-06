@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -24,8 +23,8 @@ type Entry struct {
 	Credentials map[string]string
 }
 
-// NewConfigMngr creates a new configuration manager with default file path set.
-func NewConfigMngr() *Mngr {
+// NewMngr creates a new configuration manager with default file path set.
+func NewMngr() *Mngr {
 	filename := filepath.Join(os.Getenv("HOME"), ".stash", "config.json")
 	config := Mngr{FileName: filename}
 	// Create config file if it doesn't exist:
@@ -48,8 +47,7 @@ func (cm *Mngr) createConfigFile() {
 
 // AddDestination adds a backup destination to the config file
 func (cm *Mngr) AddDestination(configEntry Entry) {
-	fmt.Fprintf(os.Stdout,
-		"Adding destination [%s] to config file [%s]\n",
+	log.Printf("Adding destination [%s] to config file [%s]\n",
 		configEntry.Name,
 		cm.FileName)
 
@@ -62,19 +60,21 @@ func (cm *Mngr) AddDestination(configEntry Entry) {
 //					combines & removes duplicate entries.
 func (cm *Mngr) GetNewConfigEntries(newEntry Entry) []Entry {
 	configFile := cm.LoadConfigFile()
-	duplicate := false
-	for _, entry := range configFile {
-		if entry.Name == newEntry.Name {
-			duplicate = true
-			fmt.Fprintf(os.Stderr,
-				"stash: Attempting to add duplicate entry %s\n",
-				newEntry.Name)
-		}
-	}
-	if !duplicate {
+	if !cm.IsDuplicateEntry(newEntry) {
 		configFile = append(configFile, newEntry)
 	}
 	return configFile
+}
+
+// IsDuplicateEntry returns true if the entry already exists in the config file
+func (cm *Mngr) IsDuplicateEntry(newEntry Entry) bool {
+	configFile := cm.LoadConfigFile()
+	for _, entry := range configFile {
+		if entry.Name == newEntry.Name {
+			return true
+		}
+	}
+	return false
 }
 
 // ToJSON marshalls a config.Entry into JSON
@@ -88,7 +88,7 @@ func (cm *Mngr) ToJSON(configEntries []Entry) []byte {
 
 // LoadConfigFile loads the config file and returns the contents
 func (cm *Mngr) LoadConfigFile() []Entry {
-	fmt.Fprintf(os.Stdout, "Loading config file [%s]\n", cm.FileName)
+	log.Printf("Loading config file [%s]\n", cm.FileName)
 	content, err := ioutil.ReadFile(cm.FileName)
 	if err != nil {
 		panic(err)

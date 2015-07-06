@@ -26,12 +26,12 @@ type Entry struct {
 // NewMngr creates a new configuration manager with default file path set.
 func NewMngr() *Mngr {
 	filename := filepath.Join(os.Getenv("HOME"), ".stash", "config.json")
-	config := Mngr{FileName: filename}
+	mngr := Mngr{FileName: filename}
 	// Create config file if it doesn't exist:
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		config.createConfigFile()
+		mngr.createConfigFile()
 	}
-	return &config
+	return &mngr
 }
 
 func (cm *Mngr) createConfigFile() {

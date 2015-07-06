@@ -45,17 +45,24 @@ func (self *ConfigMngr) createConfigFile() {
 }
 
 func (self *ConfigMngr) AddDestination(configEntry ConfigEntry) {
-	// TODO: implement
 	fmt.Fprintf(os.Stdout,
 		"Adding destination [%s] to config file [%s]\n",
 		configEntry.Name,
 		self.FileName)
 
-	jsonEntry, err := json.MarshalIndent(configEntry, "", "  ")
+	newConfig := self.GetNewConfigEntries(configEntry)
+	newJson, err := json.MarshalIndent(newConfig, "", "  ")
 	if err != nil {
 		panic(err)
 	}
-	ioutil.WriteFile(self.FileName, jsonEntry, 0644)
+	ioutil.WriteFile(self.FileName, newJson, 0644)
+}
+
+// This function takes a new config entry, loads previous entries, and combines
+func (self *ConfigMngr) GetNewConfigEntries(configEntry ConfigEntry) []ConfigEntry {
+	configFile := self.LoadConfigFile()
+	configFile = append(configFile, configEntry)
+	return configFile
 }
 
 func (self *ConfigMngr) LoadConfigFile() []ConfigEntry {
@@ -66,7 +73,7 @@ func (self *ConfigMngr) LoadConfigFile() []ConfigEntry {
 	}
 	var entries []ConfigEntry
 	if err := json.Unmarshal(content, &entries); err != nil {
-		panic(err)
+		log.Println("No config entries loaded.")
 	}
 	return entries
 }

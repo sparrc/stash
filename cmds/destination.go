@@ -66,7 +66,6 @@ func addAmazon() {
 }
 
 func getName(reader *bufio.Reader, confMngr *config.Mngr) string {
-	// TODO: check if user is trying to add a duplicate destination
 	fmt.Print("Specify a name for this destination: ")
 	text, _ := reader.ReadString('\n')
 	name := strings.TrimSpace(text)
@@ -98,7 +97,7 @@ func isValidDirectory(dir string) (bool, error) {
 			e := fmt.Sprintf("Directory %s does not exist", dir)
 			return false, errors.New(e)
 		} else {
-			e := fmt.Sprintf("Error accessing %s, do you have permission to read?", dir)
+			e := fmt.Sprintf("Error accessing %s, do you have read permission?", dir)
 			return false, errors.New(e)
 		}
 	}

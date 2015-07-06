@@ -11,7 +11,7 @@ import (
 )
 
 // Config deals with the stash configuration file
-type Config struct {
+type ConfigMngr struct {
 	// Name of the configuration file.
 	FileName string
 }
@@ -23,9 +23,9 @@ type ConfigEntry struct {
 	Credentials map[string]string
 }
 
-func NewConfig() *Config {
+func NewConfigMngr() *ConfigMngr {
 	filename := filepath.Join(os.Getenv("HOME"), ".stash", "config.json")
-	config := Config{FileName: filename}
+	config := ConfigMngr{FileName: filename}
 	// Create config file if it doesn't exist:
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		config.createConfigFile()
@@ -33,7 +33,7 @@ func NewConfig() *Config {
 	return &config
 }
 
-func (self *Config) createConfigFile() {
+func (self *ConfigMngr) createConfigFile() {
 	log.Println("Creating config file")
 	args := []string{"-p", filepath.Dir(self.FileName)}
 	if err := exec.Command("mkdir", args...).Run(); err != nil {
@@ -44,7 +44,7 @@ func (self *Config) createConfigFile() {
 	}
 }
 
-func (self *Config) AddDestination(configEntry ConfigEntry) {
+func (self *ConfigMngr) AddDestination(configEntry ConfigEntry) {
 	// TODO: implement
 	fmt.Fprintf(os.Stdout,
 		"Adding destination [%s] to config file [%s]\n",
@@ -58,7 +58,7 @@ func (self *Config) AddDestination(configEntry ConfigEntry) {
 	ioutil.WriteFile(self.FileName, jsonEntry, 0644)
 }
 
-func (self *Config) LoadConfigFile() {
+func (self *ConfigMngr) LoadConfigFile() []ConfigEntry {
 	fmt.Fprintf(os.Stdout, "Loading config file [%s]\n", self.FileName)
 	content, err := ioutil.ReadFile(self.FileName)
 	if err != nil {
@@ -68,4 +68,5 @@ func (self *Config) LoadConfigFile() {
 	if err := json.Unmarshal(content, &entries); err != nil {
 		panic(err)
 	}
+	return entries
 }

@@ -49,7 +49,7 @@ func runAdd(args []string) {
 
 func addAmazon() {
 	// TODO: implement
-	conf := config.NewConfig()
+	conf := config.NewConfigMngr()
 	confEntry := config.ConfigEntry{
 		Name:        "FooBar",
 		Folders:     []string{"/tmp/foo", "/tmp/bar"},

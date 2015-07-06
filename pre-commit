@@ -41,7 +41,7 @@ then
     exit 1
 fi
 
-go test >/dev/null 2>&1
+go test ./... >/dev/null 2>&1
 if [ $? -ne 0 ]
 then
     echo "Failed to run tests. Please check the output of"

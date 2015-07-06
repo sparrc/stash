@@ -1,0 +1,14 @@
+[
+  {
+    "Name": "FooBar",
+    "Folders": [
+      "/tmp/foo",
+      "/tmp/bar"
+    ],
+    "Type": "Amazon",
+    "Credentials": {
+      "key": "supersecret",
+      "keyID": "123"
+    }
+  }
+]

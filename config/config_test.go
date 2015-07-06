@@ -89,4 +89,12 @@ func TestJSONMarshall(t *testing.T) {
 	}
 }
 
-// Test adding duplicate configs
+// Test that duplicate configs get filtered out
+func TestAddDuplicate(t *testing.T) {
+	configMngr := Mngr{FileName: getConfFile()}
+	newEntries := configMngr.GetNewConfigEntries(getConfigEntry())
+	if len(newEntries) > 1 {
+		t.Errorf("Duplicate entry was not properly filtered, config file:\n%s",
+			newEntries)
+	}
+}

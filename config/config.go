@@ -58,10 +58,22 @@ func (cm *Mngr) AddDestination(configEntry Entry) {
 	ioutil.WriteFile(cm.FileName, JSON, 0644)
 }
 
-// GetNewConfigEntries takes a new config entry, loads previous entries, & combines
-func (cm *Mngr) GetNewConfigEntries(configEntry Entry) []Entry {
+// GetNewConfigEntries takes a new config entry, loads previous entries,
+//					combines & removes duplicate entries.
+func (cm *Mngr) GetNewConfigEntries(newEntry Entry) []Entry {
 	configFile := cm.LoadConfigFile()
-	configFile = append(configFile, configEntry)
+	duplicate := false
+	for _, entry := range configFile {
+		if entry.Name == newEntry.Name {
+			duplicate = true
+			fmt.Fprintf(os.Stderr,
+				"stash: Attempting to add duplicate entry %s\n",
+				newEntry.Name)
+		}
+	}
+	if !duplicate {
+		configFile = append(configFile, newEntry)
+	}
 	return configFile
 }
 

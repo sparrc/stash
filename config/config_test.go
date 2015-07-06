@@ -28,7 +28,7 @@ func TestLoad(t *testing.T) {
 	}
 }
 
-// Test adding another destination and loading it back
+// Test that function properly loads previous configs and adds new config
 func TestAdd(t *testing.T) {
 	wd, _ := os.Getwd()
 	testConfFile := filepath.Join(wd, "config_test.json")

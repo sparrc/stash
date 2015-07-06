@@ -29,8 +29,8 @@ type Command struct {
 	Flag flag.FlagSet
 }
 
-func (self *Command) Name() string {
-	name := self.Usage
+func (c *Command) Name() string {
+	name := c.Usage
 	i := strings.Index(name, " ")
 	if i >= 0 {
 		name = name[:i]
@@ -38,8 +38,8 @@ func (self *Command) Name() string {
 	return name
 }
 
-func (self *Command) UsageExit() {
-	fmt.Fprintf(os.Stderr, "Usage: stash %s\n\n", self.Usage)
-	fmt.Fprintf(os.Stderr, "Run 'stash help %s' for help.\n", self.Name())
+func (c *Command) UsageExit() {
+	fmt.Fprintf(os.Stderr, "Usage: stash %s\n\n", c.Usage)
+	fmt.Fprintf(os.Stderr, "Run 'stash help %s' for help.\n", c.Name())
 	os.Exit(2)
 }

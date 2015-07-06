@@ -4,6 +4,7 @@ import (
 //	"fmt"
 )
 
+// Folder specified the 'stash folder' command.
 var Folder = &Command{
 	Usage: "folder [arguments]",
 	Short: "folder backup destinations & their associated folders.",

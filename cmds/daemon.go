@@ -4,6 +4,7 @@ import (
 //	"fmt"
 )
 
+// Daemon specifies the 'stash daemon' command.
 var Daemon = &Command{
 	Usage: "daemon [arguments]",
 	Short: "control the stash daemon process",

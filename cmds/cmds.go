@@ -29,6 +29,7 @@ type Command struct {
 	Flag flag.FlagSet
 }
 
+// Name returns the name of the command
 func (c *Command) Name() string {
 	name := c.Usage
 	i := strings.Index(name, " ")
@@ -38,6 +39,7 @@ func (c *Command) Name() string {
 	return name
 }
 
+// UsageExit prints the general usage of the stash command & exits with rc==2
 func (c *Command) UsageExit() {
 	fmt.Fprintf(os.Stderr, "Usage: stash %s\n\n", c.Usage)
 	fmt.Fprintf(os.Stderr, "Run 'stash help %s' for help.\n", c.Name())

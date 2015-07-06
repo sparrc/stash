@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func getConfigEntry() ConfigEntry {
-	return ConfigEntry{
+func getConfigEntry() Entry {
+	return Entry{
 		Name:        "FooBar",
 		Folders:     []string{"/tmp/foo", "/tmp/bar"},
 		Type:        "Amazon",
@@ -25,10 +25,10 @@ func getConfFile() string {
 // Test loading the test config file
 func TestLoad(t *testing.T) {
 	testConfFile := getConfFile()
-	expectConfig := []ConfigEntry{
+	expectConfig := []Entry{
 		getConfigEntry(),
 	}
-	configMngr := ConfigMngr{FileName: testConfFile}
+	configMngr := Mngr{FileName: testConfFile}
 	fileConfig := configMngr.LoadConfigFile()
 	if !reflect.DeepEqual(fileConfig, expectConfig) {
 		t.Errorf("EXPECTED %s GOT %s",
@@ -40,17 +40,17 @@ func TestLoad(t *testing.T) {
 // Test that function properly loads previous configs and adds new config
 func TestAdd(t *testing.T) {
 	testConfFile := getConfFile()
-	newEntry := ConfigEntry{
+	newEntry := Entry{
 		Name:        "Wahoo",
 		Folders:     []string{"/home"},
 		Type:        "Google",
 		Credentials: map[string]string{"apikey": "12345"},
 	}
-	expectConfig := []ConfigEntry{
+	expectConfig := []Entry{
 		getConfigEntry(),
 		newEntry,
 	}
-	configMngr := ConfigMngr{FileName: testConfFile}
+	configMngr := Mngr{FileName: testConfFile}
 	newConfig := configMngr.GetNewConfigEntries(newEntry)
 	if !reflect.DeepEqual(newConfig, expectConfig) {
 		t.Errorf("EXPECTED %s GOT %s",
@@ -62,7 +62,7 @@ func TestAdd(t *testing.T) {
 // Test JSON marshalling a config entry
 func TestJSONMarshall(t *testing.T) {
 	testConfFile := getConfFile()
-	testConfig := []ConfigEntry{
+	testConfig := []Entry{
 		getConfigEntry(),
 	}
 	expectStr := `[
@@ -80,7 +80,7 @@ func TestJSONMarshall(t *testing.T) {
   }
 ]
 `
-	configMngr := ConfigMngr{FileName: testConfFile}
+	configMngr := Mngr{FileName: testConfFile}
 	testStr := configMngr.JSONMarshallEntry(testConfig)
 	if strings.Trim(string(testStr), " \n") != strings.Trim(expectStr, " \n") {
 		t.Errorf("\nEXPECTED\n%s\nGOT\n%s",

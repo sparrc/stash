@@ -10,22 +10,24 @@ import (
 	"path/filepath"
 )
 
-// Config deals with the stash configuration file
-type ConfigMngr struct {
+// Mngr manages the stash configuration file.
+type Mngr struct {
 	// Name of the configuration file.
 	FileName string
 }
 
-type ConfigEntry struct {
+// Entry specifies a configuration entry
+type Entry struct {
 	Name        string
 	Folders     []string
 	Type        string
 	Credentials map[string]string
 }
 
-func NewConfigMngr() *ConfigMngr {
+// NewConfigMngr creates a new configuration manager with default file path set.
+func NewConfigMngr() *Mngr {
 	filename := filepath.Join(os.Getenv("HOME"), ".stash", "config.json")
-	config := ConfigMngr{FileName: filename}
+	config := Mngr{FileName: filename}
 	// Create config file if it doesn't exist:
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		config.createConfigFile()
@@ -33,7 +35,7 @@ func NewConfigMngr() *ConfigMngr {
 	return &config
 }
 
-func (cm *ConfigMngr) createConfigFile() {
+func (cm *Mngr) createConfigFile() {
 	log.Println("Creating config file")
 	args := []string{"-p", filepath.Dir(cm.FileName)}
 	if err := exec.Command("mkdir", args...).Run(); err != nil {
@@ -44,7 +46,8 @@ func (cm *ConfigMngr) createConfigFile() {
 	}
 }
 
-func (cm *ConfigMngr) AddDestination(configEntry ConfigEntry) {
+// AddDestination adds a backup destination to the config file
+func (cm *Mngr) AddDestination(configEntry Entry) {
 	fmt.Fprintf(os.Stdout,
 		"Adding destination [%s] to config file [%s]\n",
 		configEntry.Name,
@@ -55,14 +58,15 @@ func (cm *ConfigMngr) AddDestination(configEntry ConfigEntry) {
 	ioutil.WriteFile(cm.FileName, JSON, 0644)
 }
 
-// This function takes a new config entry, loads previous entries, and combines
-func (cm *ConfigMngr) GetNewConfigEntries(configEntry ConfigEntry) []ConfigEntry {
+// GetNewConfigEntries takes a new config entry, loads previous entries, & combines
+func (cm *Mngr) GetNewConfigEntries(configEntry Entry) []Entry {
 	configFile := cm.LoadConfigFile()
 	configFile = append(configFile, configEntry)
 	return configFile
 }
 
-func (cm *ConfigMngr) JSONMarshallEntry(configEntries []ConfigEntry) []byte {
+// JSONMarshallEntry marshalls a config.Entry into JSON
+func (cm *Mngr) JSONMarshallEntry(configEntries []Entry) []byte {
 	JSON, err := json.MarshalIndent(configEntries, "", "  ")
 	if err != nil {
 		panic(err)
@@ -70,13 +74,14 @@ func (cm *ConfigMngr) JSONMarshallEntry(configEntries []ConfigEntry) []byte {
 	return JSON
 }
 
-func (cm *ConfigMngr) LoadConfigFile() []ConfigEntry {
+// LoadConfigFile loads the config file and returns the contents
+func (cm *Mngr) LoadConfigFile() []Entry {
 	fmt.Fprintf(os.Stdout, "Loading config file [%s]\n", cm.FileName)
 	content, err := ioutil.ReadFile(cm.FileName)
 	if err != nil {
 		panic(err)
 	}
-	var entries []ConfigEntry
+	var entries []Entry
 	if err := json.Unmarshal(content, &entries); err != nil {
 		log.Println("No config entries loaded.")
 	}

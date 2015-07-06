@@ -9,6 +9,7 @@ import (
 	"github.com/cameronsparr/stash/config"
 )
 
+// Destination specifies the 'stash destination' command.
 var Destination = &Command{
 	Usage: "destination [add | list | remove] [arguments]",
 	Short: "Add, list, or remove backup destinations.",
@@ -50,7 +51,7 @@ func runAdd(args []string) {
 func addAmazon() {
 	// TODO: implement
 	conf := config.NewConfigMngr()
-	confEntry := config.ConfigEntry{
+	confEntry := config.Entry{
 		Name:        "FooBar",
 		Folders:     []string{"/tmp/foo", "/tmp/bar"},
 		Type:        "Amazon",

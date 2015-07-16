@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/cameronsparr/stash/config"
+	"github.com/sparrc/stash/config"
 )
 
 func main() {

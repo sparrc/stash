@@ -1,4 +1,4 @@
-package cmds
+package runners
 
 import (
 	"bufio"
@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cameronsparr/stash/config"
+	"github.com/sparrc/stash/config"
 )
 
 // Destination specifies the 'stash destination' command.

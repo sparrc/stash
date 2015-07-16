@@ -1,4 +1,4 @@
-package config
+package stash
 
 import (
 	"os"
@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func getConfigEntry() Entry {
-	return Entry{
+func getConfigEntry() ConfigEntry {
+	return ConfigEntry{
 		Name:        "FooBar",
 		Folders:     []string{"/tmp/foo", "/tmp/bar"},
 		Type:        "Amazon",
@@ -25,11 +25,11 @@ func getConfFile() string {
 // Test loading the test config file
 func TestLoad(t *testing.T) {
 	testConfFile := getConfFile()
-	expectConfig := []Entry{
+	expectConfig := []ConfigEntry{
 		getConfigEntry(),
 	}
-	configMngr := Mngr{FileName: testConfFile}
-	fileConfig := configMngr.LoadConfigFile()
+	configMngr := Config{FileName: testConfFile}
+	fileConfig := configMngr.LoadConfig()
 	if !reflect.DeepEqual(fileConfig, expectConfig) {
 		t.Errorf("EXPECTED %s GOT %s",
 			expectConfig,
@@ -40,17 +40,17 @@ func TestLoad(t *testing.T) {
 // Test that function properly loads previous configs and adds new config
 func TestAdd(t *testing.T) {
 	testConfFile := getConfFile()
-	newEntry := Entry{
+	newEntry := ConfigEntry{
 		Name:        "Wahoo",
 		Folders:     []string{"/home"},
 		Type:        "Google",
 		Credentials: map[string]string{"apikey": "12345"},
 	}
-	expectConfig := []Entry{
+	expectConfig := []ConfigEntry{
 		getConfigEntry(),
 		newEntry,
 	}
-	configMngr := Mngr{FileName: testConfFile}
+	configMngr := Config{FileName: testConfFile}
 	newConfig := configMngr.GetNewConfigEntries(newEntry)
 	if !reflect.DeepEqual(newConfig, expectConfig) {
 		t.Errorf("EXPECTED %s GOT %s",
@@ -62,7 +62,7 @@ func TestAdd(t *testing.T) {
 // Test JSON marshalling a config entry
 func TestJSONMarshall(t *testing.T) {
 	testConfFile := getConfFile()
-	testConfig := []Entry{
+	testConfig := []ConfigEntry{
 		getConfigEntry(),
 	}
 	expectStr := `[
@@ -80,7 +80,7 @@ func TestJSONMarshall(t *testing.T) {
   }
 ]
 `
-	configMngr := Mngr{FileName: testConfFile}
+	configMngr := Config{FileName: testConfFile}
 	testStr := configMngr.ToJSON(testConfig)
 	if strings.Trim(string(testStr), " \n") != strings.Trim(expectStr, " \n") {
 		t.Errorf("\nEXPECTED\n%s\nGOT\n%s",
@@ -91,7 +91,7 @@ func TestJSONMarshall(t *testing.T) {
 
 // Test that duplicate configs get filtered out
 func TestAddDuplicate(t *testing.T) {
-	configMngr := Mngr{FileName: getConfFile()}
+	configMngr := Config{FileName: getConfFile()}
 	newEntries := configMngr.GetNewConfigEntries(getConfigEntry())
 	if len(newEntries) > 1 {
 		t.Errorf("Duplicate entry was not properly filtered, config file:\n%s",

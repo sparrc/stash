@@ -1,4 +1,4 @@
-package config
+package stash
 
 import (
 	"encoding/json"
@@ -9,32 +9,32 @@ import (
 	"path/filepath"
 )
 
-// Mngr manages the stash configuration file.
-type Mngr struct {
+// Config manages the stash configuration file.
+type Config struct {
 	// Name of the configuration file.
 	FileName string
 }
 
-// Entry specifies a configuration entry
-type Entry struct {
+// ConfigEntry specifies a configuration entry
+type ConfigEntry struct {
 	Name        string
 	Folders     []string
 	Type        string
 	Credentials map[string]string
 }
 
-// NewMngr creates a new configuration manager with default file path set.
-func NewMngr() *Mngr {
+// NewConfig creates a new configuration manager with default file path set.
+func NewConfig() *Config {
 	filename := filepath.Join(os.Getenv("HOME"), ".stash", "config.json")
-	mngr := Mngr{FileName: filename}
+	mngr := Config{FileName: filename}
 	// Create config file if it doesn't exist:
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		mngr.createConfigFile()
+		mngr.createConfig()
 	}
 	return &mngr
 }
 
-func (cm *Mngr) createConfigFile() {
+func (cm *Config) createConfig() {
 	log.Println("Creating config file")
 	args := []string{"-p", filepath.Dir(cm.FileName)}
 	if err := exec.Command("mkdir", args...).Run(); err != nil {
@@ -46,7 +46,7 @@ func (cm *Mngr) createConfigFile() {
 }
 
 // AddDestination adds a backup destination to the config file
-func (cm *Mngr) AddDestination(configEntry Entry) {
+func (cm *Config) AddDestination(configEntry ConfigEntry) {
 	log.Printf("Adding destination [%s] to config file [%s]\n",
 		configEntry.Name,
 		cm.FileName)
@@ -58,8 +58,8 @@ func (cm *Mngr) AddDestination(configEntry Entry) {
 
 // GetNewConfigEntries takes a new config entry, loads previous entries,
 //					combines & removes duplicate entries.
-func (cm *Mngr) GetNewConfigEntries(newEntry Entry) []Entry {
-	configFile := cm.LoadConfigFile()
+func (cm *Config) GetNewConfigEntries(newEntry ConfigEntry) []ConfigEntry {
+	configFile := cm.LoadConfig()
 	if !cm.IsDuplicateEntry(newEntry) {
 		configFile = append(configFile, newEntry)
 	}
@@ -67,8 +67,8 @@ func (cm *Mngr) GetNewConfigEntries(newEntry Entry) []Entry {
 }
 
 // IsDuplicateEntry returns true if the entry already exists in the config file
-func (cm *Mngr) IsDuplicateEntry(newEntry Entry) bool {
-	configFile := cm.LoadConfigFile()
+func (cm *Config) IsDuplicateEntry(newEntry ConfigEntry) bool {
+	configFile := cm.LoadConfig()
 	for _, entry := range configFile {
 		if entry.Name == newEntry.Name {
 			return true
@@ -77,8 +77,8 @@ func (cm *Mngr) IsDuplicateEntry(newEntry Entry) bool {
 	return false
 }
 
-// ToJSON marshalls a config.Entry into JSON
-func (cm *Mngr) ToJSON(configEntries []Entry) []byte {
+// ToJSON marshalls a config.ConfigEntry into JSON
+func (cm *Config) ToJSON(configEntries []ConfigEntry) []byte {
 	JSON, err := json.MarshalIndent(configEntries, "", "  ")
 	if err != nil {
 		panic(err)
@@ -86,14 +86,14 @@ func (cm *Mngr) ToJSON(configEntries []Entry) []byte {
 	return JSON
 }
 
-// LoadConfigFile loads the config file and returns the contents
-func (cm *Mngr) LoadConfigFile() []Entry {
+// LoadConfig loads the config file and returns the contents
+func (cm *Config) LoadConfig() []ConfigEntry {
 	log.Printf("Loading config file [%s]\n", cm.FileName)
 	content, err := ioutil.ReadFile(cm.FileName)
 	if err != nil {
 		panic(err)
 	}
-	var entries []Entry
+	var entries []ConfigEntry
 	if err := json.Unmarshal(content, &entries); err != nil {
 		log.Println("No config entries loaded.")
 	}

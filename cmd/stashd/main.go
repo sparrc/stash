@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/sparrc/stash/config"
+	"github.com/sparrc/stash"
 )
 
 func main() {
@@ -15,8 +15,8 @@ func main() {
 		done <- true
 	}()
 
-	configMngr := config.NewMngr()
-	log.Println("Waiting " + configMngr.FileName)
+	config := stash.NewConfig()
+	log.Println("Waiting " + config.FileName)
 
 	<-done
 }

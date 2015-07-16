@@ -1,4 +1,4 @@
-package runners
+package subcmd
 
 import (
 	"bufio"
@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/sparrc/stash/config"
+	"github.com/sparrc/stash"
 )
 
 // Destination specifies the 'stash destination' command.
@@ -53,23 +53,22 @@ func runAdd(args []string) {
 }
 
 func addAmazon() {
-	// TODO: implement
-	confMngr := config.NewMngr()
+	confFile := stash.NewConfig()
 	reader := bufio.NewReader(os.Stdin)
-	confEntry := config.Entry{
-		Name:        getName(reader, confMngr),
+	confEntry := stash.ConfigEntry{
+		Name:        getName(reader, confFile),
 		Folders:     getFolders(reader),
 		Type:        "Amazon",
 		Credentials: getCredentials(reader),
 	}
-	confMngr.AddDestination(confEntry)
+	confFile.AddDestination(confEntry)
 }
 
-func getName(reader *bufio.Reader, confMngr *config.Mngr) string {
+func getName(reader *bufio.Reader, confFile *stash.Config) string {
 	fmt.Print("Specify a name for this destination: ")
 	text, _ := reader.ReadString('\n')
 	name := strings.TrimSpace(text)
-	if confMngr.IsDuplicateEntry(config.Entry{Name: name}) {
+	if confFile.IsDuplicateEntry(stash.ConfigEntry{Name: name}) {
 		log.Fatalf("Attempted to add duplicate entry [%s], if you were "+
 			"trying to add folders to an existing backup destination, use "+
 			"'stash folder add'",

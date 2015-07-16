@@ -11,18 +11,6 @@
 # checks from the sample hook, it builds the project with go build,
 # runs the tests (if any), formats the source code with go fmt, and
 # finally go vet to make sure only correct and good code is committed.
-#
-# Take note that the ASCII filename check of the standard hook was
-# removed. Go is unicode, and so should be the filenames. Stop using
-# obsolete operating systems without proper Unicode support.
-
-if git rev-parse --verify HEAD >/dev/null 2>&1
-then
-    against=HEAD
-else
-    # Initial commit: diff against an empty tree object
-    against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
-fi
 
 # If there are no go files, it makes no sense to run the other commands
 # (and indeed, go build would fail). This is undesirable.
@@ -30,24 +18,6 @@ if [ -z "$(ls | grep '\.go$')" ]
 then
     echo "No '.go' files found to run pre-commit hook on"
     exit 0
-fi
-
-go build >/dev/null 2>&1
-if [ $? -ne 0 ]
-then
-    echo "Failed to build project. Please check the output of"
-    echo "go build or run commit with --no-verify if you know"
-    echo "what you are doing."
-    exit 1
-fi
-
-go test ./... >/dev/null 2>&1
-if [ $? -ne 0 ]
-then
-    echo "Failed to run tests. Please check the output of"
-    echo "go test or run commit with --no-verify if you know"
-    echo "what you are doing."
-    exit 1
 fi
 
 go fmt ./... >/dev/null 2>&1

@@ -17,7 +17,7 @@ Install Go:
 
 Install `stash`:
 
-    go get github.com/cameronsparr/stash
+    go get github.com/sparrc/stash/...
 
 Add a backup destination (not working yet):
 
@@ -33,8 +33,4 @@ Add folder to an existing backup destination (not working yet):
 
 ### To Contribute:
 
-To start contributing, get the code and copy the pre-commit hook:
-
-    go get github.com/cameronsparr/stash
-    cd $GOPATH/src/github.com/cameronsparr/stash
-    cp ./pre-commit ./.git/hooks/pre-commit
+TBD

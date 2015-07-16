@@ -13,7 +13,7 @@ Install Go:
 
     or
 
-    sudo apt-get install go
+    sudo apt-get install golang
 
 Install `stash`:
 
@@ -33,4 +33,26 @@ Add folder to an existing backup destination (not working yet):
 
 ### To Contribute:
 
-TBD
+First [Setup your $GOPATH and go environment](https://golang.org/doc/code.html)
+
+Get `stash`:
+
+    go get github.com/sparrc/stash/...
+
+Change your remote to push to Phabricator:
+
+    cd $GOPATH/src/github.com/sparrc/stash
+    git remote remove origin
+    git remote add origin ssh://git@phabricator.csparr.net/diffusion/STASH/stash.git
+
+Runn tests (from root dir)
+
+    go test ./...
+
+Re-compile and install binaries
+
+    go install ./...
+
+OR compile and run directly
+
+    go run cmd/stashd/main.go

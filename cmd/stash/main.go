@@ -25,7 +25,7 @@ func main() {
 	flag.Usage = usageExit
 	flag.Parse()
 	log.SetFlags(0)
-	//log.SetPrefix("stash: ")
+	log.SetPrefix("DEBUG: ")
 	args := flag.Args()
 	if len(args) < 1 {
 		usageExit()

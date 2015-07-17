@@ -95,7 +95,12 @@ func (cm *Config) LoadConfig() []ConfigEntry {
 	if err != nil {
 		panic(err)
 	}
+
 	var entries []ConfigEntry
+	// If the config file is empty, return empty entries
+	if len(content) == 0 {
+		return entries
+	}
 	if err := json.Unmarshal(content, &entries); err != nil {
 		log.Println("Error loading config: ", err)
 	}

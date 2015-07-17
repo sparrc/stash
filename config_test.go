@@ -73,6 +73,7 @@ func TestJSONMarshall(t *testing.T) {
       "/tmp/bar"
     ],
     "Type": "Amazon",
+    "Frequency": 0,
     "Credentials": {
       "key": "supersecret",
       "keyID": "123"

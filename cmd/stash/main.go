@@ -25,7 +25,7 @@ func main() {
 	flag.Usage = usageExit
 	flag.Parse()
 	log.SetFlags(0)
-	log.SetPrefix("stash: ")
+	//log.SetPrefix("stash: ")
 	args := flag.Args()
 	if len(args) < 1 {
 		usageExit()
@@ -65,8 +65,6 @@ Use "stash help [command]" for more information about a command.
 `
 
 var helpTemplate = `
-Usage: stash {{.Usage}}
-
 {{.Long | trim}}
 `
 

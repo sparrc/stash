@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 )
 
 // Config manages the stash configuration file.
@@ -20,18 +21,19 @@ type ConfigEntry struct {
 	Name        string
 	Folders     []string
 	Type        string
+	Frequency   time.Duration
 	Credentials map[string]string
 }
 
 // NewConfig creates a new configuration manager with default file path set.
 func NewConfig() *Config {
 	filename := filepath.Join(os.Getenv("HOME"), ".stash", "config.json")
-	mngr := Config{FileName: filename}
+	config := Config{FileName: filename}
 	// Create config file if it doesn't exist:
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		mngr.createConfig()
+		config.createConfig()
 	}
-	return &mngr
+	return &config
 }
 
 func (cm *Config) createConfig() {
@@ -95,7 +97,7 @@ func (cm *Config) LoadConfig() []ConfigEntry {
 	}
 	var entries []ConfigEntry
 	if err := json.Unmarshal(content, &entries); err != nil {
-		log.Println("No config entries loaded.")
+		log.Println("Error loading config: ", err)
 	}
 	return entries
 }

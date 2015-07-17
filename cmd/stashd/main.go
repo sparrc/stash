@@ -8,15 +8,20 @@ import (
 )
 
 func main() {
-
-	done := make(chan bool)
-	go func() {
-		time.Sleep(10 * time.Second)
-		done <- true
-	}()
-
+	ticker := time.NewTicker(5 * time.Second)
+	quit := make(chan struct{})
 	config := stash.NewConfig()
-	log.Println("Waiting " + config.FileName)
-
-	<-done
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				log.Println("Doing stuff with " + config.FileName)
+			case <-quit:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
+	time.Sleep(30 * time.Second)
+	close(quit)
 }

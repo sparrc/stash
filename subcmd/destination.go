@@ -7,16 +7,25 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/sparrc/stash"
 )
 
 // Destination specifies the 'stash destination' command.
 var Destination = &Command{
-	Usage: "destination [add | list | remove] [arguments]",
+	Usage: "destination [ add | list | remove ]",
 	Short: "Add, list, or remove backup destinations.",
 	Long: `
-Add, list, or remove backup destinations.
+Usage:
+
+	stash destination [command]
+
+The commands are:
+
+	add	Add a backup destination
+	list	List configured backup destinations
+	remove	Remove a backup destination & associated folders
 `,
 	Run: runDestination,
 }
@@ -60,6 +69,7 @@ func addAmazon() {
 		Folders:     getFolders(reader),
 		Type:        "Amazon",
 		Credentials: getCredentials(reader),
+		Frequency:   getFrequency(reader),
 	}
 	confFile.AddDestination(confEntry)
 }
@@ -105,6 +115,20 @@ func isValidDirectory(dir string) (bool, error) {
 
 func getCredentials(reader *bufio.Reader) map[string]string {
 	return map[string]string{"key": "supersecret"}
+}
+
+func getFrequency(reader *bufio.Reader) time.Duration {
+	fmt.Println("Backup Frequency, input as short string (ie, 30m or 2h43m10s)")
+	fmt.Println("Valid time units are s, m, h")
+	fmt.Print("Every ")
+	text, _ := reader.ReadString('\n')
+	text = strings.TrimSpace(text)
+	d, err := time.ParseDuration(text)
+	if err != nil {
+		log.Println("Error parsing frequency, try again")
+		return getFrequency(reader)
+	}
+	return d
 }
 
 func runList(args []string) {

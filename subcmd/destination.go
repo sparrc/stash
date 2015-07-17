@@ -121,8 +121,9 @@ func getCredentials(reader *bufio.Reader) map[string]string {
 }
 
 func getFrequency(reader *bufio.Reader) time.Duration {
-	color.Blue("Backup Frequency, input as short string (ie, 30m or 2h43m10s)")
-	color.Blue("Valid time units are s, m, h")
+	color.Blue("Backup Frequency, use a short string like: 30m or 2h43m10s")
+	color.Blue("Valid time units are: h, m, s")
+	fmt.Println("")
 	fmt.Print("Backup Every: ")
 	text, _ := reader.ReadString('\n')
 	text = strings.TrimSpace(text)

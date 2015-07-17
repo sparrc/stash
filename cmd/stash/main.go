@@ -2,12 +2,13 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"os"
 	"strings"
 	"text/template"
+
+	"github.com/fatih/color"
 
 	"github.com/sparrc/stash/subcmd"
 )
@@ -45,8 +46,8 @@ func main() {
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "stash: unknown command %q\n", args[0])
-	fmt.Fprintf(os.Stderr, "Run 'stash help' for usage.\n")
+	color.Red("stash: unknown command %q\n", args[0])
+	color.Red("Run 'stash help' for usage.\n")
 	os.Exit(2)
 }
 
@@ -59,7 +60,7 @@ Usage:
 
 The commands are:
 {{range .}}
-    {{.Name | printf "%-8s"}}	{{.Short}}{{end}}
+	{{.Name | printf "%-8s"}}	{{.Short}}{{end}}
 
 Use "stash help [command]" for more information about a command.
 `
@@ -74,8 +75,8 @@ func help(args []string) {
 		return
 	}
 	if len(args) != 1 {
-		fmt.Fprintf(os.Stderr, "usage: stash help command\n\n")
-		fmt.Fprintf(os.Stderr, "Too many arguments given.\n")
+		color.Red("usage: stash help command\n\n")
+		color.Red("Too many arguments given.\n")
 		os.Exit(2)
 	}
 	for _, cmd := range commands {

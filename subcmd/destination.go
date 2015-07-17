@@ -66,16 +66,16 @@ func addAmazon() {
 	confFile := stash.NewConfig()
 	reader := bufio.NewReader(os.Stdin)
 	confEntry := stash.ConfigEntry{
-		Name:        getName(reader, confFile),
-		Folders:     getFolders(reader),
+		Name:        userInputName(reader, confFile),
+		Folders:     userInputFolders(reader),
 		Type:        "Amazon",
-		Credentials: getCredentials(reader),
-		Frequency:   getFrequency(reader),
+		Credentials: userInputCredentials(reader),
+		Frequency:   userInputFrequency(reader),
 	}
 	confFile.AddDestination(confEntry)
 }
 
-func getName(reader *bufio.Reader, confFile *stash.Config) string {
+func userInputName(reader *bufio.Reader, confFile *stash.Config) string {
 	fmt.Print("Specify a name for this destination: ")
 	text, _ := reader.ReadString('\n')
 	name := strings.TrimSpace(text)
@@ -88,7 +88,7 @@ func getName(reader *bufio.Reader, confFile *stash.Config) string {
 	return name
 }
 
-func getFolders(reader *bufio.Reader) []string {
+func userInputFolders(reader *bufio.Reader) []string {
 	fmt.Print("Specify directories to backup (space-separated): ")
 	text, _ := reader.ReadString('\n')
 	dirs := strings.Split(strings.TrimSpace(text), " ")
@@ -116,11 +116,11 @@ func isValidDirectory(dir string) (bool, error) {
 	return true, nil
 }
 
-func getCredentials(reader *bufio.Reader) map[string]string {
+func userInputCredentials(reader *bufio.Reader) map[string]string {
 	return map[string]string{"key": "supersecret"}
 }
 
-func getFrequency(reader *bufio.Reader) time.Duration {
+func userInputFrequency(reader *bufio.Reader) time.Duration {
 	color.Blue("Backup Frequency, use a short string like: 30m or 2h43m10s")
 	color.Blue("Valid time units are: h, m, s")
 	fmt.Println("")
@@ -130,7 +130,7 @@ func getFrequency(reader *bufio.Reader) time.Duration {
 	d, err := time.ParseDuration(text)
 	if err != nil {
 		color.Red("Error parsing frequency, try again")
-		return getFrequency(reader)
+		return userInputFrequency(reader)
 	}
 	return d
 }

@@ -45,3 +45,9 @@ func (c *Command) UsageExit() {
 	fmt.Fprintf(os.Stderr, "Run 'stash help %s' for help.\n", c.Name())
 	os.Exit(2)
 }
+
+// LongUsageExit prints the long usage of the command & exits with rc==2
+func (c *Command) LongUsageExit() {
+	fmt.Fprintf(os.Stderr, c.Long)
+	os.Exit(2)
+}

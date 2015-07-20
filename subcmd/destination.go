@@ -15,7 +15,7 @@ import (
 
 // Destination specifies the 'stash destination' command.
 var Destination = &Command{
-	Usage: "destination [ add | list | remove ]",
+	Usage: "destination [ add | list | remove | help ]",
 	Short: "Add, list, or remove backup destinations.",
 	Long: `
 Usage:
@@ -42,6 +42,8 @@ func runDestination(cmd *Command, args []string) {
 		runList(args)
 	case "remove":
 		runRemove(args)
+	case "help":
+		cmd.LongUsageExit()
 	}
 }
 

@@ -61,6 +61,11 @@ func runAdd(args []string) {
 		addAmazon()
 	case "2":
 		return
+	case "":
+		return
+	default:
+		color.Red("Invalid option, exiting")
+		os.Exit(1)
 	}
 }
 

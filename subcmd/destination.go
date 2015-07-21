@@ -83,8 +83,8 @@ func userInputName(reader *bufio.Reader, confFile *stash.Config) string {
 	name := strings.TrimSpace(text)
 	if confFile.IsDuplicateEntry(stash.ConfigEntry{Name: name}) {
 		color.Red("Attempted to add duplicate entry [%s], "+
-			"if you were trying to add folders to an existing backup destination, "+
-			"use 'stash folder add'", name)
+			"if you were trying to add folders to an existing backup "+
+			"destination, use 'stash folder add'", name)
 		os.Exit(1)
 	}
 	return name
@@ -138,10 +138,21 @@ func userInputFrequency(reader *bufio.Reader) time.Duration {
 }
 
 func runList(args []string) {
-	reader := bufio.NewReader(os.Stdin)
-	color.Cyan("This is not implemented yet, but do you love marutaro? [Y/y]")
-	text, _ := reader.ReadString('\n')
-	fmt.Println(text)
+	confFile := stash.NewConfig()
+	col := color.New(color.FgMagenta)
+	color.New(color.FgBlue, color.Bold).Println("Current Backup Destinations:")
+	fmt.Println()
+	for _, entry := range confFile.Conf {
+		col.Printf("Name:		")
+		fmt.Println(entry.Name)
+		col.Printf("Folders:	")
+		fmt.Println(entry.Folders)
+		col.Printf("Type:		")
+		fmt.Println(entry.Type)
+		col.Printf("Frequency:	")
+		fmt.Println(entry.Frequency)
+		fmt.Println()
+	}
 }
 
 func runRemove(args []string) {

@@ -89,7 +89,7 @@ func (cm *Config) IsDuplicateEntry(newEntry ConfigEntry) bool {
 	return false
 }
 
-// ToJSON marshalls a config.ConfigEntry into JSON
+// ToJSON marshalls ConfigEntries into JSON
 func (cm *Config) ToJSON(configEntries ConfigEntries) []byte {
 	JSON, err := json.MarshalIndent(configEntries, "", "  ")
 	if err != nil {

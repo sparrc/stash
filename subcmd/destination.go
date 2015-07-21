@@ -60,7 +60,7 @@ func runAdd(args []string) {
 	case "1":
 		addAmazon()
 	case "2":
-		return
+		addGoogle()
 	case "":
 		return
 	default:
@@ -80,6 +80,10 @@ func addAmazon() {
 		Frequency:   userInputFrequency(reader),
 	}
 	confFile.AddDestination(confEntry)
+}
+
+func addGoogle() {
+	return
 }
 
 func userInputName(reader *bufio.Reader, confFile *stash.Config) string {

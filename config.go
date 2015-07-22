@@ -2,12 +2,13 @@ package stash
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
+
+	"github.com/boltdb/bolt"
 )
 
 // Config manages the stash configuration file.
@@ -34,7 +35,7 @@ type ConfigEntries []ConfigEntry
 // NewConfig creates a new configuration manager with default file path set.
 func NewConfig() *Config {
 	// Get the config file location path
-	filename := filepath.Join(os.Getenv("HOME"), ".stash", "config.json")
+	filename := filepath.Join(os.Getenv("HOME"), ".stash", "config")
 
 	// Create the config struct
 	config := Config{
@@ -67,8 +68,27 @@ func (cm *Config) AddDestination(configEntry ConfigEntry) {
 		cm.FileName)
 
 	allConfigEntries := cm.getNewConfigEntries(configEntry)
-	JSON := cm.ToJSON(allConfigEntries)
-	ioutil.WriteFile(cm.FileName, JSON, 0644)
+	// TODO handle timeout if someone else has it open
+	db, err := bolt.Open(cm.FileName, 0666, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	if err := db.Update(func(tx *bolt.Tx) error {
+		// TODO handle error
+		b, _ := tx.CreateBucketIfNotExists([]byte("destinations"))
+
+		for _, entry := range allConfigEntries {
+			k := entry.Name
+			// TODO handle error
+			data, _ := json.Marshal(entry)
+			b.Put([]byte(k), data)
+		}
+
+		return nil
+	}); err != nil {
+		panic(err)
+	}
 }
 
 // getNewConfigEntries takes a new config entry, loads previous entries,
@@ -91,15 +111,6 @@ func (cm *Config) IsDuplicateEntry(newEntry ConfigEntry) bool {
 	return false
 }
 
-// ToJSON marshalls ConfigEntries into JSON
-func (cm *Config) ToJSON(configEntries ConfigEntries) []byte {
-	JSON, err := json.MarshalIndent(configEntries, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return JSON
-}
-
 // LoadConfig loads the config file and returns the contents
 func (cm *Config) ReloadConfig() {
 	cm.Entries = loadConfig(cm.FileName)
@@ -107,17 +118,36 @@ func (cm *Config) ReloadConfig() {
 
 func loadConfig(filename string) ConfigEntries {
 	log.Printf("Loading config file [%s]\n", filename)
-	content, err := ioutil.ReadFile(filename)
+
 	var entries ConfigEntries
+
+	// TODO: Handle a timeout if someone has it open "rw"
+	db, err := bolt.Open(filename, 0666, &bolt.Options{ReadOnly: true})
 	if err != nil {
-		// This indicates there was no config file present, return empty entries
-		return entries
-	} else if len(content) == 0 {
+		// Indicates that there are currently no entries if there is no db
 		return entries
 	}
+	defer db.Close()
 
-	if err := json.Unmarshal(content, &entries); err != nil {
-		log.Println("Error loading config: ", err)
+	if err := db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("destinations"))
+
+		// Bucket doesnt exist:
+		if b == nil {
+			return nil
+		}
+
+		c := b.Cursor()
+
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			var ce ConfigEntry
+			json.Unmarshal(v, &ce)
+			entries = append(entries, ce)
+		}
+
+		return nil
+	}); err != nil {
+		panic(err)
 	}
 	return entries
 }

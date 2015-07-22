@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 )
@@ -46,37 +45,6 @@ func TestAdd(t *testing.T) {
 	}
 }
 
-// Test JSON marshalling a config entry
-func TestJSONMarshall(t *testing.T) {
-	testConfig := ConfigEntries{
-		testConfigEntry(),
-	}
-	expectStr := `[
-  {
-    "Name": "FooBar",
-    "Folders": [
-      "/tmp/foo",
-      "/tmp/bar"
-    ],
-    "Type": "Amazon",
-    "Frequency": 0,
-    "LastBak": "0001-01-01T00:00:00Z",
-    "Credentials": {
-      "key": "supersecret",
-      "keyID": "123"
-    }
-  }
-]
-`
-	configMngr := getTestConfig()
-	testStr := configMngr.ToJSON(testConfig)
-	if strings.Trim(string(testStr), " \n") != strings.Trim(expectStr, " \n") {
-		t.Errorf("\nEXPECTED\n%s\nGOT\n%s",
-			expectStr,
-			testStr)
-	}
-}
-
 // Test that duplicate configs get filtered out
 func TestAddDuplicate(t *testing.T) {
 	configMngr := getTestConfig()
@@ -91,17 +59,17 @@ func testConfigEntry() ConfigEntry {
 	t := time.Date(0001, time.January, 01, 0, 0, 0, 0, time.UTC)
 	return ConfigEntry{
 		Name:        "FooBar",
-		Folders:     []string{"/tmp/foo", "/tmp/bar"},
+		Folders:     []string{"/tmp"},
 		Type:        "Amazon",
 		Frequency:   time.Duration(0),
 		LastBak:     t,
-		Credentials: map[string]string{"key": "supersecret", "keyID": "123"},
+		Credentials: map[string]string{"key": "supersecret"},
 	}
 }
 
 func getTestConfig() *Config {
 	wd, _ := os.Getwd()
-	filename := filepath.Join(wd, "config_test.json")
+	filename := filepath.Join(wd, "testdata", "config_test")
 	config := Config{
 		FileName: filename,
 		Entries:  loadConfig(filename),

@@ -15,20 +15,22 @@ func TestLoad(t *testing.T) {
 		testConfigEntry(),
 	}
 	config := getTestConfig()
-	if !reflect.DeepEqual(config.Conf, expectConfig) {
+	if !reflect.DeepEqual(config.Entries, expectConfig) {
 		t.Errorf("EXPECTED %s GOT %s",
 			expectConfig,
-			config.Conf)
+			config.Entries)
 	}
 }
 
 // Test that function properly loads previous configs and adds new config
 func TestAdd(t *testing.T) {
+	var t0 time.Time
 	newEntry := ConfigEntry{
 		Name:        "Wahoo",
 		Folders:     []string{"/home"},
 		Type:        "Google",
 		Frequency:   time.Duration(0),
+		LastBak:     t0,
 		Credentials: map[string]string{"apikey": "12345"},
 	}
 	expectConfig := ConfigEntries{
@@ -58,6 +60,7 @@ func TestJSONMarshall(t *testing.T) {
     ],
     "Type": "Amazon",
     "Frequency": 0,
+    "LastBak": "0001-01-01T00:00:00Z",
     "Credentials": {
       "key": "supersecret",
       "keyID": "123"
@@ -85,11 +88,13 @@ func TestAddDuplicate(t *testing.T) {
 }
 
 func testConfigEntry() ConfigEntry {
+	t := time.Date(0001, time.January, 01, 0, 0, 0, 0, time.UTC)
 	return ConfigEntry{
 		Name:        "FooBar",
 		Folders:     []string{"/tmp/foo", "/tmp/bar"},
 		Type:        "Amazon",
 		Frequency:   time.Duration(0),
+		LastBak:     t,
 		Credentials: map[string]string{"key": "supersecret", "keyID": "123"},
 	}
 }
@@ -99,7 +104,7 @@ func getTestConfig() *Config {
 	filename := filepath.Join(wd, "config_test.json")
 	config := Config{
 		FileName: filename,
-		Conf:     loadConfig(filename),
+		Entries:  loadConfig(filename),
 	}
 	return &config
 }

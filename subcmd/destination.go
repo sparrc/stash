@@ -151,7 +151,7 @@ func runList(args []string) {
 	col := color.New(color.FgMagenta)
 	color.New(color.FgBlue, color.Bold).Println("Current Backup Destinations:")
 	fmt.Println()
-	for _, entry := range confFile.Conf {
+	for _, entry := range confFile.Entries {
 		col.Printf("Name:		")
 		fmt.Println(entry.Name)
 		col.Printf("Folders:	")

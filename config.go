@@ -16,7 +16,7 @@ type Config struct {
 	FileName string
 
 	// Entries in the config file
-	Conf ConfigEntries
+	Entries ConfigEntries
 }
 
 // ConfigEntry specifies a configuration entry
@@ -25,6 +25,7 @@ type ConfigEntry struct {
 	Folders     []string
 	Type        string
 	Frequency   time.Duration
+	LastBak     time.Time
 	Credentials map[string]string
 }
 
@@ -38,7 +39,7 @@ func NewConfig() *Config {
 	// Create the config struct
 	config := Config{
 		FileName: filename,
-		Conf:     loadConfig(filename),
+		Entries:  loadConfig(filename),
 	}
 
 	// Create config file if it doesn't exist:
@@ -71,17 +72,18 @@ func (cm *Config) AddDestination(configEntry ConfigEntry) {
 }
 
 // getNewConfigEntries takes a new config entry, loads previous entries,
-//					combines & removes duplicate entries.
+// combines & removes duplicate entries.
 func (cm *Config) getNewConfigEntries(newEntry ConfigEntry) ConfigEntries {
+	cm.ReloadConfig()
 	if !cm.IsDuplicateEntry(newEntry) {
-		cm.Conf = append(cm.Conf, newEntry)
+		cm.Entries = append(cm.Entries, newEntry)
 	}
-	return cm.Conf
+	return cm.Entries
 }
 
 // IsDuplicateEntry returns true if the entry already exists in the config file
 func (cm *Config) IsDuplicateEntry(newEntry ConfigEntry) bool {
-	for _, entry := range cm.Conf {
+	for _, entry := range cm.Entries {
 		if entry.Name == newEntry.Name {
 			return true
 		}
@@ -99,22 +101,21 @@ func (cm *Config) ToJSON(configEntries ConfigEntries) []byte {
 }
 
 // LoadConfig loads the config file and returns the contents
-func (cm *Config) ReloadConfig() ConfigEntries {
-	return loadConfig(cm.FileName)
+func (cm *Config) ReloadConfig() {
+	cm.Entries = loadConfig(cm.FileName)
 }
 
 func loadConfig(filename string) ConfigEntries {
 	log.Printf("Loading config file [%s]\n", filename)
 	content, err := ioutil.ReadFile(filename)
-	if err != nil {
-		panic(err)
-	}
-
 	var entries ConfigEntries
-	// If the config file is empty, return empty entries
-	if len(content) == 0 {
+	if err != nil {
+		// This indicates there was no config file present, return empty entries
+		return entries
+	} else if len(content) == 0 {
 		return entries
 	}
+
 	if err := json.Unmarshal(content, &entries); err != nil {
 		log.Println("Error loading config: ", err)
 	}

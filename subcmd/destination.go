@@ -83,7 +83,6 @@ func addAmazon() {
 		color.Red("Fatal error adding backup destination: ", err)
 		os.Exit(1)
 	}
-
 }
 
 func addGoogle() {
@@ -163,7 +162,7 @@ func runList(args []string) {
 		col.Printf("Type:		")
 		fmt.Println(entry.Type)
 		col.Printf("Frequency:	")
-		fmt.Println(entry.Frequency)
+		fmt.Println("Every ", entry.Frequency)
 		col.Printf("Last Backup:	")
 		// .Format takes an example string for how the stamp should look
 		fmt.Println(entry.LastBak.Format("Jan 2, 2006 at 3:04pm (MST)"))

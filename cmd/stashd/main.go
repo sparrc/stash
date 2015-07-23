@@ -2,19 +2,36 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/sparrc/stash"
 )
 
 func main() {
-	ticker := time.NewTicker(10 * time.Second)
+	// How frequently to poll for backups
+	ticker := time.NewTicker(5 * time.Second)
+
+	// Channel to control daemon goroutine
 	quit := make(chan bool)
+	defer close(quit)
 	go daemon(ticker, quit)
-	time.Sleep(120 * time.Second)
-	close(quit)
+
+	// Run daemon until an interrupt is received
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt, os.Kill, syscall.SIGTERM)
+	for {
+		select {
+		case kill := <-interrupt:
+			log.Println("Got signal: ", kill)
+			return
+		}
+	}
 }
 
+// daemon controls the backup processors
 func daemon(ticker *time.Ticker, quit <-chan bool) {
 	config := stash.NewConfig()
 	for {

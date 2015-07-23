@@ -1,6 +1,7 @@
 package stash
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -10,10 +11,18 @@ import (
 
 // Test loading the test config file
 func TestLoad(t *testing.T) {
+	t0 := time.Date(0001, time.January, 01, 0, 0, 0, 0, time.UTC)
 	expectConfig := ConfigEntries{
-		testConfigEntry(),
+		ConfigEntry{
+			Name:        "FooBar",
+			Folders:     []string{"/tmp"},
+			Type:        "Amazon",
+			Frequency:   time.Duration(0),
+			LastBak:     t0,
+			Credentials: map[string]string{"key": "supersecret"},
+		},
 	}
-	config := getTestConfig()
+	config := loadTestConfig()
 	if !reflect.DeepEqual(config.Entries, expectConfig) {
 		t.Errorf("EXPECTED %s GOT %s",
 			expectConfig,
@@ -21,9 +30,41 @@ func TestLoad(t *testing.T) {
 	}
 }
 
-// Test that function properly loads previous configs and adds new config
-func TestAdd(t *testing.T) {
-	var t0 time.Time
+// Test IsDuplicateEntry returns true/false correctly
+func TestIsDuplicateEntry(t *testing.T) {
+	t0 := time.Date(0001, time.January, 01, 0, 0, 0, 0, time.UTC)
+	dupeConfig := ConfigEntry{
+		Name:        "FooBar",
+		Folders:     []string{"/tmp"},
+		Type:        "Amazon",
+		Frequency:   time.Duration(0),
+		LastBak:     t0,
+		Credentials: map[string]string{"key": "supersecret"},
+	}
+	config := loadTestConfig()
+	if !config.IsDuplicateEntry(dupeConfig) {
+		t.Error("Expected IsDuplicateEntry to return True, dupeEntry: ",
+			dupeConfig, " fileEntry: ", config.Entries)
+	}
+
+	// Change dupeConfig and verify that IsDuplicateEntry returns False:
+	dupeConfig.Name = "NotDupe"
+	if config.IsDuplicateEntry(dupeConfig) {
+		t.Error("Expected IsDuplicateEntry to return False, dupeEntry: ",
+			dupeConfig, " fileEntry: ", config.Entries)
+	}
+}
+
+// Test that we can add a new config entry, load, and read it back identically
+func TestAddReload(t *testing.T) {
+	tmp := tempdb()
+	defer os.Remove(tmp)
+	config := Config{
+		FileName: tmp,
+		Entries:  loadConfig(tmp),
+	}
+
+	t0 := time.Date(0001, time.January, 01, 0, 0, 0, 0, time.UTC)
 	newEntry := ConfigEntry{
 		Name:        "Wahoo",
 		Folders:     []string{"/home"},
@@ -32,42 +73,17 @@ func TestAdd(t *testing.T) {
 		LastBak:     t0,
 		Credentials: map[string]string{"apikey": "12345"},
 	}
-	expectConfig := ConfigEntries{
-		testConfigEntry(),
-		newEntry,
-	}
-	configMngr := getTestConfig()
-	newConfig := configMngr.getNewConfigEntries(newEntry)
-	if !reflect.DeepEqual(newConfig, expectConfig) {
+
+	config.AddDestination(newEntry)
+	config.ReloadConfig()
+	if !reflect.DeepEqual(config.Entries[0], newEntry) {
 		t.Errorf("EXPECTED %s GOT %s",
-			expectConfig,
-			newConfig)
+			newEntry,
+			config.Entries[0])
 	}
 }
 
-// Test that duplicate configs get filtered out
-func TestAddDuplicate(t *testing.T) {
-	configMngr := getTestConfig()
-	newEntries := configMngr.getNewConfigEntries(testConfigEntry())
-	if len(newEntries) > 1 {
-		t.Errorf("Duplicate entry was not properly filtered, config file:\n%s",
-			newEntries)
-	}
-}
-
-func testConfigEntry() ConfigEntry {
-	t := time.Date(0001, time.January, 01, 0, 0, 0, 0, time.UTC)
-	return ConfigEntry{
-		Name:        "FooBar",
-		Folders:     []string{"/tmp"},
-		Type:        "Amazon",
-		Frequency:   time.Duration(0),
-		LastBak:     t,
-		Credentials: map[string]string{"key": "supersecret"},
-	}
-}
-
-func getTestConfig() *Config {
+func loadTestConfig() *Config {
 	wd, _ := os.Getwd()
 	filename := filepath.Join(wd, "testdata", "config_test")
 	config := Config{
@@ -75,4 +91,14 @@ func getTestConfig() *Config {
 		Entries:  loadConfig(filename),
 	}
 	return &config
+}
+
+func tempdb() string {
+	wd, _ := os.Getwd()
+	dir := filepath.Join(wd, "testdata")
+	f, _ := ioutil.TempFile(dir, "tmpdb")
+	fname := f.Name()
+	defer f.Close()
+	defer os.Remove(fname)
+	return fname
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"time"
 
@@ -43,22 +42,7 @@ func NewConfig() *Config {
 		Entries:  loadConfig(filename),
 	}
 
-	// Create config file if it doesn't exist:
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		config.createConfig()
-	}
 	return &config
-}
-
-func (cm *Config) createConfig() {
-	log.Println("Creating config file")
-	args := []string{"-p", filepath.Dir(cm.FileName)}
-	if err := exec.Command("mkdir", args...).Run(); err != nil {
-		panic(err)
-	}
-	if err := exec.Command("touch", cm.FileName).Run(); err != nil {
-		panic(err)
-	}
 }
 
 // AddDestination adds a backup destination to the config file
@@ -67,7 +51,6 @@ func (cm *Config) AddDestination(configEntry ConfigEntry) {
 		configEntry.Name,
 		cm.FileName)
 
-	allConfigEntries := cm.getNewConfigEntries(configEntry)
 	// TODO handle timeout if someone else has it open
 	db, err := bolt.Open(cm.FileName, 0666, nil)
 	if err != nil {
@@ -78,27 +61,14 @@ func (cm *Config) AddDestination(configEntry ConfigEntry) {
 		// TODO handle error
 		b, _ := tx.CreateBucketIfNotExists([]byte("destinations"))
 
-		for _, entry := range allConfigEntries {
-			k := entry.Name
-			// TODO handle error
-			data, _ := json.Marshal(entry)
-			b.Put([]byte(k), data)
-		}
+		// TODO handle error
+		data, _ := json.Marshal(configEntry)
+		b.Put([]byte(configEntry.Name), data)
 
 		return nil
 	}); err != nil {
 		panic(err)
 	}
-}
-
-// getNewConfigEntries takes a new config entry, loads previous entries,
-// combines & removes duplicate entries.
-func (cm *Config) getNewConfigEntries(newEntry ConfigEntry) ConfigEntries {
-	cm.ReloadConfig()
-	if !cm.IsDuplicateEntry(newEntry) {
-		cm.Entries = append(cm.Entries, newEntry)
-	}
-	return cm.Entries
 }
 
 // IsDuplicateEntry returns true if the entry already exists in the config file
@@ -111,7 +81,7 @@ func (cm *Config) IsDuplicateEntry(newEntry ConfigEntry) bool {
 	return false
 }
 
-// LoadConfig loads the config file and returns the contents
+// ReloadConfig loads the config file and returns the contents
 func (cm *Config) ReloadConfig() {
 	cm.Entries = loadConfig(cm.FileName)
 }
@@ -121,11 +91,16 @@ func loadConfig(filename string) ConfigEntries {
 
 	var entries ConfigEntries
 
-	// TODO: Handle a timeout if someone has it open "rw"
+	// If DB file does not exist, just return empty entries
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return entries
+	}
+
+	// TODO: Handle a db open timeout if someone has it open "rw"
 	db, err := bolt.Open(filename, 0666, &bolt.Options{ReadOnly: true})
 	if err != nil {
-		// Indicates that there are currently no entries if there is no db
-		return entries
+		// Something went terribly wrong
+		panic(err)
 	}
 	defer db.Close()
 

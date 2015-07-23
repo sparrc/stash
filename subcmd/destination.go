@@ -79,7 +79,11 @@ func addAmazon() {
 		Credentials: userInputCredentials(reader),
 		Frequency:   userInputFrequency(reader),
 	}
-	confFile.AddDestination(confEntry)
+	if err := confFile.AddDestination(confEntry); err != nil {
+		color.Red("Fatal error adding backup destination: ", err)
+		os.Exit(1)
+	}
+
 }
 
 func addGoogle() {

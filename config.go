@@ -46,7 +46,7 @@ func NewConfig() *Config {
 }
 
 // AddDestination adds a backup destination to the config file
-func (cm *Config) AddDestination(configEntry ConfigEntry) {
+func (cm *Config) AddDestination(configEntry ConfigEntry) error {
 	log.Printf("Adding destination [%s] to config file [%s]\n",
 		configEntry.Name,
 		cm.FileName)
@@ -57,18 +57,23 @@ func (cm *Config) AddDestination(configEntry ConfigEntry) {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	if err := db.Update(func(tx *bolt.Tx) error {
-		// TODO handle error
-		b, _ := tx.CreateBucketIfNotExists([]byte("destinations"))
 
-		// TODO handle error
-		data, _ := json.Marshal(configEntry)
+	err = db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte("destinations"))
+		if err != nil {
+			return err
+		}
+
+		data, err := json.Marshal(configEntry)
+		if err != nil {
+			return err
+		}
+
 		b.Put([]byte(configEntry.Name), data)
 
 		return nil
-	}); err != nil {
-		panic(err)
-	}
+	})
+	return err
 }
 
 // IsDuplicateEntry returns true if the entry already exists in the config file
@@ -86,6 +91,8 @@ func (cm *Config) ReloadConfig() {
 	cm.Entries = loadConfig(cm.FileName)
 }
 
+// loadConfig loads the given config db file and returns ConfigEntries.
+// In general, if anything goes wrong, it just returns empty ConfigEntries.
 func loadConfig(filename string) ConfigEntries {
 	log.Printf("Loading config file [%s]\n", filename)
 
@@ -122,7 +129,7 @@ func loadConfig(filename string) ConfigEntries {
 
 		return nil
 	}); err != nil {
-		panic(err)
+		log.Println("Error loading config: ", err)
 	}
 	return entries
 }

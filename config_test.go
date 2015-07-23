@@ -12,6 +12,7 @@ import (
 // Test loading the test config file
 func TestLoad(t *testing.T) {
 	t0 := time.Date(0001, time.January, 01, 0, 0, 0, 0, time.UTC)
+	// This config matches that in the testdata/config file
 	expectConfig := ConfigEntries{
 		ConfigEntry{
 			Name:        "FooBar",

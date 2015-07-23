@@ -91,6 +91,40 @@ func (cm *Config) ReloadConfig() {
 	cm.Entries = loadConfig(cm.FileName)
 }
 
+// TouchLastBak updates the "LastBak" timestamp to time.Now()
+// TODO: write test for this function
+func (cm *Config) TouchLastBak(name string) error {
+	// TODO handle timeout if someone else has it open
+	db, err := bolt.Open(cm.FileName, 0666, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		b, err := tx.CreateBucketIfNotExists([]byte("destinations"))
+		if err != nil {
+			return err
+		}
+
+		// Get the entry and set new LastBak time
+		v := b.Get([]byte(name))
+		var ce ConfigEntry
+		json.Unmarshal(v, &ce)
+		ce.LastBak = time.Now()
+
+		// Put the updated entry back into the DB
+		data, err := json.Marshal(ce)
+		if err != nil {
+			return err
+		}
+		b.Put([]byte(name), data)
+
+		return nil
+	})
+	return err
+}
+
 // loadConfig loads the given config db file and returns ConfigEntries.
 // In general, if anything goes wrong, it just returns empty ConfigEntries.
 func loadConfig(filename string) ConfigEntries {

@@ -21,7 +21,7 @@ Description=Stash Backup Daemon
 [Service]
 PIDFile=/var/run/stashd.pid
 ExecStartPre=/bin/rm -f /var/run/stashd.pid
-ExecStart=stashd
+ExecStart=$GOPATH/bin/stashd
 Restart=on-abort
 [Install]
 WantedBy=multi-user.target
@@ -39,7 +39,7 @@ elif [ -d "$HOME/Library/LaunchAgents" ]; then
     <string>stashd</string>
     <key>ProgramArguments</key>
     <array>
-        <string>stashd</string>
+        <string>$GOPATH/bin/stashd</string>
     </array>
     <key>RunAtLoad</key>
     <true/>

@@ -112,7 +112,8 @@ func (cm *Config) TouchLastBak(name string) error {
 		v := b.Get([]byte(name))
 		var ce ConfigEntry
 		json.Unmarshal(v, &ce)
-		ce.LastBak = time.Now()
+		// Subtract a millisecond to avoid polling creep
+		ce.LastBak = time.Now().Add(-1 * time.Millisecond)
 
 		// Put the updated entry back into the DB
 		data, err := json.Marshal(ce)

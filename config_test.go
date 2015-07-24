@@ -1,10 +1,11 @@
 package stash
 
 import (
-	"io/ioutil"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -95,12 +96,8 @@ func TestTouchLastBak(t *testing.T) {
 
 	t0 := time.Date(0001, time.January, 01, 0, 0, 0, 0, time.UTC)
 	newEntry := ConfigEntry{
-		Name:        "Wahoo",
-		Folders:     []string{"/home"},
-		Type:        "Google",
-		Frequency:   time.Duration(0),
-		LastBak:     t0,
-		Credentials: map[string]string{"apikey": "12345"},
+		Name:    "Wahoo",
+		LastBak: t0,
 	}
 
 	// Add entry to db
@@ -126,6 +123,43 @@ func TestTouchLastBak(t *testing.T) {
 	}
 }
 
+// Test deleting entries and that deleting non-existent entries does nothing.
+func TestDelete(t *testing.T) {
+	tmp := tempdb()
+	defer os.Remove(tmp)
+	config := Config{
+		FileName: tmp,
+		Entries:  loadConfig(tmp),
+	}
+
+	newEntry := ConfigEntry{
+		Name: "Wahoo",
+	}
+
+	// Add entry to db
+	config.AddDestination(newEntry)
+
+	// Delete non-existent entry does nothing:
+	err := config.DeleteEntry("I dont exist")
+	if err != nil {
+		t.Error("Error deleting non-existent entry: ", err)
+	}
+
+	// Delete "Wahoo" entry:
+	err = config.DeleteEntry("Wahoo")
+	if err != nil {
+		t.Error("Error deleting Wahoo entry: ", err)
+	}
+
+	// Verify that "Wahoo" entry is gone:
+	config.ReloadConfig()
+	if len(config.Entries) > 0 {
+		t.Error("Deleted 'Wahoo' entry but found entries afterwards: ",
+			config.Entries)
+	}
+}
+
+// loads the static test database
 func loadTestConfig() *Config {
 	wd, _ := os.Getwd()
 	filename := filepath.Join(wd, "testdata", "config_test")
@@ -136,12 +170,9 @@ func loadTestConfig() *Config {
 	return &config
 }
 
+// Returns a tmp database filename
 func tempdb() string {
 	wd, _ := os.Getwd()
-	dir := filepath.Join(wd, "testdata")
-	f, _ := ioutil.TempFile(dir, "tmpdb")
-	fname := f.Name()
-	defer f.Close()
-	defer os.Remove(fname)
-	return fname
+	return filepath.Join(wd, "testdata",
+		"tmpdb"+strconv.Itoa(rand.Intn(99999)))
 }

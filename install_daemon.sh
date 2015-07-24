@@ -1,5 +1,10 @@
 #!/usr/bin/env sh
 
+
+#
+# UPSTART daemon file:
+#
+
 if [ -d "$HOME/.config/upstart" ]; then
     cat > "$HOME/.config/upstart/stashd.conf" <<- EOM
 pre-start script
@@ -15,6 +20,11 @@ exec $GOPATH/bin/stashd >> $HOME/.stash/stashd.log 2>&1
 EOM
     start stashd
 
+
+#
+# SYSTEMD daemon file:
+#
+
 elif [ -d "$HOME/.config/systemd" ]; then
     cat > "$HOME/.config/systemd/system/stashd.service" <<- EOM
 [Unit]
@@ -28,6 +38,11 @@ Restart=on-abort
 WantedBy=multi-user.target
 EOM
     systemctl enable stashd
+
+
+#
+# LAUNCHD daemon file:
+#
 
 elif [ -d "$HOME/Library/LaunchAgents" ]; then
     cat > "$HOME/Library/LaunchAgents/stashd.plist" <<- EOM

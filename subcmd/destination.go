@@ -15,8 +15,8 @@ import (
 
 // Destination specifies the 'stash destination' command.
 var Destination = &Command{
-	Usage: "destination [ add | list | remove | help ]",
-	Short: "Add, list, or remove backup destinations.",
+	Usage: "destination [ add | list | delete | help ]",
+	Short: "Add, list, or delete backup destinations.",
 	Long: `
 Usage:
 
@@ -26,7 +26,7 @@ The commands are:
 
 	add	Add a backup destination
 	list	List configured backup destinations
-	remove	Remove a backup destination & associated folders
+	delete	Delete a backup destination & associated folders
 `,
 	Run: runDestination,
 }
@@ -40,8 +40,8 @@ func runDestination(cmd *Command, args []string) {
 		runAdd(args)
 	case "list":
 		runList(args)
-	case "remove":
-		runRemove(args)
+	case "delete":
+		runDelete(args)
 	case "help":
 		cmd.LongUsageExit()
 	}
@@ -70,16 +70,16 @@ func runAdd(args []string) {
 }
 
 func addAmazon() {
-	confFile := stash.NewConfig()
+	config := stash.NewConfig()
 	reader := bufio.NewReader(os.Stdin)
 	confEntry := stash.ConfigEntry{
-		Name:        userInputName(reader, confFile),
+		Name:        userInputName(reader, config),
 		Folders:     userInputFolders(reader),
 		Type:        "Amazon",
 		Credentials: userInputCredentials(reader),
 		Frequency:   userInputFrequency(reader),
 	}
-	if err := confFile.AddDestination(confEntry); err != nil {
+	if err := config.AddDestination(confEntry); err != nil {
 		color.Red("Fatal error adding backup destination: ", err)
 		os.Exit(1)
 	}
@@ -150,11 +150,11 @@ func userInputFrequency(reader *bufio.Reader) time.Duration {
 }
 
 func runList(args []string) {
-	confFile := stash.NewConfig()
+	config := stash.NewConfig()
 	col := color.New(color.FgMagenta)
 	color.New(color.FgBlue, color.Bold).Println("Current Backup Destinations:")
 	fmt.Println()
-	for _, entry := range confFile.Entries {
+	for _, entry := range config.Entries {
 		col.Printf("Name:		")
 		fmt.Println(entry.Name)
 		col.Printf("Folders:	")
@@ -170,9 +170,21 @@ func runList(args []string) {
 	}
 }
 
-func runRemove(args []string) {
+func runDelete(args []string) {
+	config := stash.NewConfig()
 	reader := bufio.NewReader(os.Stdin)
-	color.Cyan("This is not implemented yet, but do you love marutaro? [Y/y]")
+	color.Red("WARNING! Deleted entries cannot be recovered")
+	color.Blue("Please choose one of the following entries: ")
+	for _, entry := range config.Entries {
+		color.Magenta("	%s", entry.Name)
+	}
+	fmt.Println()
+	fmt.Print("Entry to delete (case-sensitive): ")
 	text, _ := reader.ReadString('\n')
-	fmt.Println(text)
+	text = strings.TrimSpace(text)
+	err := config.DeleteEntry(text)
+	if err != nil {
+		color.Red("Fatal error deleting an entry: %s", err)
+		os.Exit(1)
+	}
 }

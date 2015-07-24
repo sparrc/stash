@@ -126,6 +126,31 @@ func (cm *Config) TouchLastBak(name string) error {
 	return err
 }
 
+// DeleteEntry deletes the given entry
+func (cm *Config) DeleteEntry(name string) error {
+	// TODO handle timeout if someone else has it open
+	db, err := bolt.Open(cm.FileName, 0666, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("destinations"))
+
+		// bucket doesnt exist:
+		if b == nil {
+			return nil
+		}
+
+		// Delete the entry:
+		err := b.Delete([]byte(name))
+
+		return err
+	})
+	return err
+}
+
 // loadConfig loads the given config db file and returns ConfigEntries.
 // In general, if anything goes wrong, it just returns empty ConfigEntries.
 func loadConfig(filename string) ConfigEntries {

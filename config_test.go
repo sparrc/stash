@@ -84,6 +84,45 @@ func TestAddReload(t *testing.T) {
 	}
 }
 
+// Test that LastBak updates the timestamp to time.Now()
+func TestTouchLastBak(t *testing.T) {
+	tmp := tempdb()
+	defer os.Remove(tmp)
+	config := Config{
+		FileName: tmp,
+		Entries:  loadConfig(tmp),
+	}
+
+	t0 := time.Date(0001, time.January, 01, 0, 0, 0, 0, time.UTC)
+	newEntry := ConfigEntry{
+		Name:        "Wahoo",
+		Folders:     []string{"/home"},
+		Type:        "Google",
+		Frequency:   time.Duration(0),
+		LastBak:     t0,
+		Credentials: map[string]string{"apikey": "12345"},
+	}
+
+	// Add entry to db
+	config.AddDestination(newEntry)
+
+	// Update last backup timestamp
+	config.TouchLastBak("Wahoo")
+	config.ReloadConfig()
+
+	// Verify last backup timestamp is past t0
+	if !config.Entries[0].LastBak.After(t0) {
+		t.Error("Expected last backup date to be past t0\nt0:", t0,
+			"Last backup:", config.Entries[0].LastBak)
+	}
+
+	// And verify that the timestamp is within 2 seconds:
+	if !config.Entries[0].LastBak.After(time.Now().Add(-2 * time.Second)) {
+		t.Error("Expected last backup date to be very recent\n",
+			"Last backup:", config.Entries[0].LastBak)
+	}
+}
+
 func loadTestConfig() *Config {
 	wd, _ := os.Getwd()
 	filename := filepath.Join(wd, "testdata", "config_test")

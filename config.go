@@ -92,7 +92,6 @@ func (cm *Config) ReloadConfig() {
 }
 
 // TouchLastBak updates the "LastBak" timestamp to time.Now()
-// TODO: write test for this function
 func (cm *Config) TouchLastBak(name string) error {
 	// TODO handle timeout if someone else has it open
 	db, err := bolt.Open(cm.FileName, 0666, nil)

@@ -101,9 +101,11 @@ func (cm *Config) TouchLastBak(name string) error {
 	defer db.Close()
 
 	err = db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte("destinations"))
-		if err != nil {
-			return err
+		b := tx.Bucket([]byte("destinations"))
+
+		// bucket doesnt exist:
+		if b == nil {
+			return nil
 		}
 
 		// Get the entry and set new LastBak time

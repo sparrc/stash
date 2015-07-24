@@ -110,6 +110,9 @@ func TestTouchLastBak(t *testing.T) {
 	config.TouchLastBak("Wahoo")
 	config.ReloadConfig()
 
+	// Verify that TouchLastBak on a non-existent entry causes no harm:
+	config.TouchLastBak("I dont exist")
+
 	// Verify last backup timestamp is past t0
 	if !config.Entries[0].LastBak.After(t0) {
 		t.Error("Expected last backup date to be past t0\nt0:", t0,

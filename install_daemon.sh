@@ -13,6 +13,7 @@ start on startup
 
 exec $GOPATH/bin/stashd >> $HOME/.stash/stashd.log 2>&1
 EOM
+    start stashd
 
 elif [ -d "$HOME/.config/systemd" ]; then
     cat > "$HOME/.config/systemd/system/stashd.service" <<- EOM
@@ -26,6 +27,7 @@ Restart=on-abort
 [Install]
 WantedBy=multi-user.target
 EOM
+    systemctl enable stashd
 
 elif [ -d "$HOME/Library/LaunchAgents" ]; then
     cat > "$HOME/Library/LaunchAgents/stashd.plist" <<- EOM
@@ -46,13 +48,15 @@ elif [ -d "$HOME/Library/LaunchAgents" ]; then
     <key>WorkingDirectory</key>
     <string>$HOME/.stash</string>
     <key>StandardErrorPath</key>
-    <string>$HOME/.stash/stashd.err</string>
+    <string>$HOME/.stash/stashd.log</string>
     <key>StandardOutPath</key>
     <string>$HOME/.stash/stashd.log</string>
 </dict>
 </plist>
 EOM
+    launchctl load "$HOME/Library/LaunchAgents/stashd.plist"
 
 else
-    echo "Your OS is not supported, sorry"
+    echo "Your OS does not support launchd, systemd, or upstart."
+    echo "You can manually start the daemon via 'stashd'"
 fi

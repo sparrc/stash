@@ -6,6 +6,8 @@
 #
 
 if [ -d "$HOME/.config/upstart" ]; then
+    echo "Making upstart daemon file at ~/.config/upstart/stashd.conf"
+
     cat > "$HOME/.config/upstart/stashd.conf" <<- EOM
 pre-start script
     mkdir -p $HOME/.stash
@@ -26,6 +28,8 @@ EOM
 #
 
 elif [ -d "$HOME/.config/systemd" ]; then
+    echo "Making systemd daemon file at ~/.config/systemd/system/stashd.service"
+
     cat > "$HOME/.config/systemd/system/stashd.service" <<- EOM
 [Unit]
 Description=Stash Backup Daemon
@@ -45,6 +49,8 @@ EOM
 #
 
 elif [ -d "$HOME/Library/LaunchAgents" ]; then
+    echo "Making launchd daemon file at ~/Library/LaunchAgents/stashd.plist"
+
     cat > "$HOME/Library/LaunchAgents/stashd.plist" <<- EOM
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

@@ -40,7 +40,7 @@ func runDestination(cmd *Command, args []string) {
 		runAdd(args)
 	case "list":
 		runList(args)
-	case "delete":
+	case "delete", "del":
 		runDelete(args)
 	case "help":
 		cmd.LongUsageExit()

@@ -10,17 +10,8 @@ import (
 
 	"github.com/fatih/color"
 
-	"github.com/sparrc/stash/subcmd"
+	"github.com/sparrc/stash/cmd/stash/subcmd"
 )
-
-// Commands lists the available commands and help topics.
-// The order here is the order in which they are printed
-// by 'stash help'.
-var commands = []*subcmd.Command{
-	subcmd.Destination,
-	subcmd.Folder,
-	subcmd.Daemon,
-}
 
 func main() {
 	flag.Usage = usageExit
@@ -32,23 +23,30 @@ func main() {
 		usageExit()
 	}
 
-	if args[0] == "help" {
+	switch args[0] {
+	case "help":
 		help(args[1:])
 		return
-	}
-
-	for _, cmd := range commands {
-		if cmd.Name() == args[0] {
-			cmd.Flag.Usage = func() { cmd.UsageExit() }
-			cmd.Flag.Parse(args[1:])
-			cmd.Run(cmd, cmd.Flag.Args())
-			return
-		}
+	case "destination", "dest":
+		runCmd(subcmd.Destination, args)
+		return
+	case "folder", "fold":
+		runCmd(subcmd.Folder, args)
+		return
+	case "daemon", "daem":
+		runCmd(subcmd.Daemon, args)
+		return
 	}
 
 	color.Red("stash: unknown command %q\n", args[0])
 	color.Red("Run 'stash help' for usage.\n")
 	os.Exit(2)
+}
+
+func runCmd(cmd *subcmd.Command, args []string) {
+	cmd.Flag.Usage = func() { cmd.UsageExit() }
+	cmd.Flag.Parse(args[1:])
+	cmd.Run(cmd, cmd.Flag.Args())
 }
 
 var usageTemplate = `
@@ -68,6 +66,15 @@ Use "stash help [command]" for more information about a command.
 var helpTemplate = `
 {{.Long | trim}}
 `
+
+// Commands lists the available commands and help topics.
+// The order here is the order in which they are printed
+// by 'stash help'.
+var commands = []*subcmd.Command{
+	subcmd.Destination,
+	subcmd.Folder,
+	subcmd.Daemon,
+}
 
 func help(args []string) {
 	if len(args) == 0 {

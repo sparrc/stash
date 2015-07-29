@@ -139,12 +139,12 @@ func (cm *Config) DeleteEntry(name string) error {
 	err = db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("destinations"))
 
-		// bucket doesnt exist:
+		// bucket doesnt exist, so do nothing:
 		if b == nil {
 			return nil
 		}
 
-		// Delete the entry:
+		// Delete the entry (this returns nil if entry doesnt exist)
 		err := b.Delete([]byte(name))
 
 		return err

@@ -38,7 +38,7 @@ func main() {
 		return
 	}
 
-	color.Red("stash: unknown command %q\n", args[0])
+	color.Red("stash: unknown subcommand %q\n", args[0])
 	color.Red("Run 'stash help' for usage.\n")
 	os.Exit(2)
 }

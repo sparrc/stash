@@ -44,6 +44,9 @@ func runDestination(cmd *Command, args []string) {
 		runDelete(args)
 	case "help":
 		cmd.LongUsageExit()
+	default:
+		color.Red("Invalid subcommand: %s", args[0])
+		os.Exit(1)
 	}
 }
 

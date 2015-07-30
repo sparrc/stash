@@ -1,9 +1,11 @@
 Stash Backup
 ------------
 
-A command-line backup tool in a similar vein to [Arq](https://www.arqbackup.com/),
-but without a UI and with full support for linux. Supporting Amazon (S3, glacier)
-and Google cloud storage (nearline and regular).
+A command-line backup tool in a similar vein to
+[Arq](https://www.arqbackup.com/), but aiming to be controlled completely
+from a CLI rather than a UI, and with full support for linux & mac.
+
+Currently planned to support Amazon (S3, glacier) and Google cloud storage.
 
 ### To Use:
 
@@ -19,11 +21,11 @@ Install `stash`:
 
     go get github.com/sparrc/stash/...
 
-Add a backup destination (not working yet):
+Add a backup destination:
 
     stash destination add
 
-View all backup destinations (not working yet):
+View all backup destinations:
 
     stash destination list
 
@@ -39,13 +41,11 @@ Get `stash`:
 
     go get github.com/sparrc/stash/...
 
-Change your remote to push to Phabricator:
+Go to source directory:
 
     cd $GOPATH/src/github.com/sparrc/stash
-    git remote remove origin
-    git remote add origin ssh://git@phabricator.csparr.net/diffusion/STASH/stash.git
 
-Runn tests (from root dir)
+Run tests (from root dir)
 
     go test ./...
 

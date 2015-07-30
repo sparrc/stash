@@ -120,15 +120,15 @@ func userInputFolders(reader *bufio.Reader) []string {
 }
 
 func isValidDirectory(dir string) (bool, error) {
-	red := color.New(color.FgRed).SprintfFunc()
 	if _, err := os.Stat(dir); err != nil {
+		red := color.New(color.FgRed).SprintfFunc()
+		var e string
 		if os.IsNotExist(err) {
-			e := red("Directory %s does not exist", dir)
-			return false, errors.New(e)
+			e = red("Directory %s does not exist", dir)
 		} else {
-			e := red("Error accessing %s, do you have read permission?", dir)
-			return false, errors.New(e)
+			e = red("Error accessing %s, do you have read permission?", dir)
 		}
+		return false, errors.New(e)
 	}
 	return true, nil
 }

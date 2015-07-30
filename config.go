@@ -29,6 +29,7 @@ type ConfigEntry struct {
 	Credentials map[string]string
 }
 
+// ConfigEntries is an array of configuration entries
 type ConfigEntries []ConfigEntry
 
 // NewConfig creates a new configuration manager with default file path set.

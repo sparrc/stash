@@ -1,5 +1,9 @@
 dependencies:
   post:
+    # install golint
+    - go get github.com/golang/lint/golint
+    # install gocyclo
+    - go get github.com/fzipp/gocyclo
     # install binaries
     - go install ./...
 
@@ -8,7 +12,9 @@ test:
     # Run unit tests
     - go test -v -race ./...
   post:
-    # Run go vet
     - go vet ./...
+    - golint ./...
+    # Test that complexity of a single function isnt over 15
+    - gocyclo -over 15 .
     # Test that the stash binary basically runs:
     - /home/ubuntu/.go_project/bin/stash destination list

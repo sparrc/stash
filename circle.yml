@@ -1,0 +1,14 @@
+dependencies:
+  post:
+    # install binaries
+    - go install ./...
+
+test:
+  override:
+    # Run unit tests
+    - go test -v -race ./...
+  post:
+    # Run go vet
+    - go vet ./...
+    # Test that the stash binary basically runs:
+    - /home/ubuntu/.go_project/bin/stash destination list

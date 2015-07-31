@@ -52,7 +52,7 @@ func (cm *Config) AddDestination(configEntry ConfigEntry) error {
 		configEntry.Name,
 		cm.FileName)
 
-	// TODO handle timeout if someone else has it open
+	// TODO blah blah handle timeout if someone else has it open
 	db, err := bolt.Open(cm.FileName, 0666, nil)
 	if err != nil {
 		log.Fatal(err)

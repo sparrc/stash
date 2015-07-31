@@ -1,3 +1,5 @@
+[![Circle CI](https://circleci.com/gh/sparrc/stash.svg?style=svg)](https://circleci.com/gh/sparrc/stash)
+
 Stash Backup
 ------------
 

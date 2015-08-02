@@ -32,12 +32,13 @@ The commands are:
 }
 
 func runDestination(cmd *Command, args []string) {
+
 	if len(args) == 0 {
 		cmd.UsageExit()
 	}
 	switch args[0] {
 	case "add":
-		runAdd(args)
+		runAdd(cmd, args)
 	case "list":
 		runList(args)
 	case "delete", "del":
@@ -50,7 +51,14 @@ func runDestination(cmd *Command, args []string) {
 	}
 }
 
-func runAdd(args []string) {
+func runAdd(cmd *Command, args []string) {
+
+	// TODO: create flags for setting type, name, folders, credentials, and
+	// frequency when adding a new backup destination
+	dt := cmd.Flag.String("type", "", "Backup destination type")
+	cmd.Flag.Parse(args[1:])
+	fmt.Println("User requested backup destination type: ", dt)
+
 	reader := bufio.NewReader(os.Stdin)
 	color.Blue("Which type of backup destination would you like to add?")
 	color.Blue("	1. Amazon (S3 or Glacier)")

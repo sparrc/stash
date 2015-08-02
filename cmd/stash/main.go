@@ -28,13 +28,13 @@ func main() {
 		help(args[1:])
 		return
 	case "destination", "dest":
-		runCmd(subcmd.Destination, args)
+		runCmd(subcmd.Destination, args[1:])
 		return
 	case "folder", "fold":
-		runCmd(subcmd.Folder, args)
+		runCmd(subcmd.Folder, args[1:])
 		return
 	case "daemon", "daem":
-		runCmd(subcmd.Daemon, args)
+		runCmd(subcmd.Daemon, args[1:])
 		return
 	}
 
@@ -45,8 +45,7 @@ func main() {
 
 func runCmd(cmd *subcmd.Command, args []string) {
 	cmd.Flag.Usage = func() { cmd.UsageExit() }
-	cmd.Flag.Parse(args[1:])
-	cmd.Run(cmd, cmd.Flag.Args())
+	cmd.Run(cmd, args)
 }
 
 var usageTemplate = `

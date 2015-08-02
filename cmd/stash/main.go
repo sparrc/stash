@@ -44,7 +44,6 @@ func main() {
 }
 
 func runCmd(cmd *subcmd.Command, args []string) {
-	cmd.Flag.Usage = func() { cmd.UsageExit() }
 	cmd.Run(cmd, args)
 }
 

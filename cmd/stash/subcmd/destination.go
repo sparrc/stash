@@ -53,24 +53,43 @@ func runDestination(cmd *Command, args []string) {
 
 func runAdd(cmd *Command, args []string) {
 
-	// TODO: create flags for setting type, name, folders, credentials, and
-	// frequency when adding a new backup destination
-	dt := cmd.Flag.String("type", "", "Backup destination type")
-	cmd.Flag.Parse(args[1:])
-	fmt.Println("User requested backup destination type: ", dt)
+	cmd.Flag.Usage = func() {
+		fmt.Println("Usage: stash destination add")
+		cmd.Flag.PrintDefaults()
+		os.Exit(1)
+	}
 
-	reader := bufio.NewReader(os.Stdin)
-	color.Blue("Which type of backup destination would you like to add?")
-	color.Blue("	1. Amazon (S3 or Glacier)")
-	color.Blue("	2. Google Cloud")
-	fmt.Println("")
-	fmt.Print("Choose an option [1-2]: ")
-	text, _ := reader.ReadString('\n')
-	text = strings.TrimSpace(text)
-	switch text {
-	case "1":
+	// TODO: use these flags as a substitute for user-input funcs
+	// TODO: figure out how to handle credentials
+	var dt, n, fs string
+	var fq time.Duration
+	cmd.Flag.StringVar(&dt, "type", "",
+		"Backup destination type (Amazon | Google).")
+	cmd.Flag.StringVar(&n, "name", "",
+		"Name for the new backuo destination.")
+	cmd.Flag.StringVar(&fs, "folders", "",
+		"Comma or space-separated list of folders")
+	cmd.Flag.DurationVar(&fq, "frequency", time.Duration(0),
+		"Frequency at which to backup this destination.")
+	cmd.Flag.Parse(args[1:])
+	fmt.Println("User flags: ", dt, n, fs, fq)
+
+	// If not specified in a flag, prompt user for backup destination type
+	if dt == "" {
+		reader := bufio.NewReader(os.Stdin)
+		color.Blue("Which type of backup destination would you like to add?")
+		color.Blue("	1. Amazon (S3 or Glacier)")
+		color.Blue("	2. Google Cloud")
+		fmt.Println("")
+		fmt.Print("Choose an option [1-2]: ")
+		text, _ := reader.ReadString('\n')
+		dt = strings.TrimSpace(text)
+	}
+
+	switch strings.ToLower(dt) {
+	case "1", "amazon":
 		addAmazon()
-	case "2":
+	case "2", "google":
 		addGoogle()
 	case "":
 		return

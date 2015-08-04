@@ -9,6 +9,9 @@ dependencies:
 
 test:
   pre:
+    # Verify that all files are go formatted:
+    - "[ `git ls-files | grep '.go$' | xargs gofmt -l 2>&1 | wc -l` -eq 0 ]"
+    # Vet and lint:
     - go vet ./...
     - golint ./...
   override:

@@ -1,6 +1,4 @@
-[![Circle CI](https://circleci.com/gh/sparrc/stash.png?circle-token=:circle-token)](https://circleci.com/gh/sparrc/stash)
-
-Stash Backup
+Stash Backup [![Circle CI](https://circleci.com/gh/sparrc/stash.png?circle-token=:circle-token)](https://circleci.com/gh/sparrc/stash)
 ------------
 
 A command-line backup tool in a similar vein to

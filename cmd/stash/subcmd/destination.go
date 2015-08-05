@@ -67,34 +67,31 @@ func runAdd(cmd *Command, args []string) {
 	cmd.Flag.StringVar(&name, "name", "",
 		"Name for the new backuo destination.")
 	cmd.Flag.StringVar(&folders, "folders", "",
-		"Comma or space-separated list of folders.")
+		"Comma-separated list of folders.")
 	cmd.Flag.DurationVar(&freq, "frequency", time.Duration(0),
 		"Frequency at which to backup this destination.")
 	cmd.Flag.Parse(args[1:])
 
-	if destType == "" || name == "" || folders == "" || freq == time.Duration(0) {
-		reader := bufio.NewReader(os.Stdin)
+	reader := bufio.NewReader(os.Stdin)
 
-		// If not specified in a flag, prompt user for backup destination type
-		if destType == "" {
-			userInputType(reader)
-		}
+	// If not specified in a flag, prompt user for backup destination type
+	if destType == "" {
+		destType = userInputType(reader)
+	}
 
-		// If not specified in a flag, prompt user for backup name
-		if name == "" {
-			name = userInputName(reader)
-		}
+	// If not specified in a flag, prompt user for backup name
+	if name == "" {
+		name = userInputName(reader)
+	}
 
-		// If not specified in a flag, prompt user for frequency
-		if freq == time.Duration(0) {
-			freq = userInputFrequency(reader)
-		}
+	// If not specified in a flag, prompt user for frequency
+	if freq == time.Duration(0) {
+		freq = userInputFrequency(reader)
 	}
 
 	// If not specified in a flag, prompt user for folders
 	var foldersList []string
 	if folders == "" {
-		reader := bufio.NewReader(os.Stdin)
 		foldersList = userInputFolders(reader)
 	} else {
 		foldersList = strings.Split(folders, ",")
@@ -106,7 +103,7 @@ func runAdd(cmd *Command, args []string) {
 	case "google":
 		addGoogle()
 	default:
-		color.Red("Invalid option, exiting")
+		color.Red("Invalid destination type, received: %s", destType)
 		os.Exit(1)
 	}
 }

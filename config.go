@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"time"
 
@@ -34,8 +35,15 @@ type ConfigEntries []ConfigEntry
 
 // NewConfig creates a new configuration manager with default file path set.
 func NewConfig() *Config {
+
+	stashdir := filepath.Join(os.Getenv("HOME"), ".stash")
 	// Get the config file location path
-	filename := filepath.Join(os.Getenv("HOME"), ".stash", "config")
+	filename := filepath.Join(stashdir, "config")
+
+	// If DB directory does not exist, create it
+	if _, err := os.Stat(stashdir); os.IsNotExist(err) {
+		exec.Command("mkdir", "-p", stashdir).Run()
+	}
 
 	// Create the config struct
 	config := Config{
@@ -55,7 +63,7 @@ func (cm *Config) AddDestination(configEntry ConfigEntry) error {
 	// TODO handle timeout if someone else has it open
 	db, err := bolt.Open(cm.FileName, 0666, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error opening the database file", err)
 	}
 	defer db.Close()
 

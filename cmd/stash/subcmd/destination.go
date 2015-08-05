@@ -59,56 +59,71 @@ func runAdd(cmd *Command, args []string) {
 		os.Exit(1)
 	}
 
-	// TODO: use these flags as a substitute for user-input funcs
 	// TODO: figure out how to handle credentials
-	var dt, n, fs string
-	var fq time.Duration
-	cmd.Flag.StringVar(&dt, "type", "",
+	var destType, name, folders string
+	var freq time.Duration
+	cmd.Flag.StringVar(&destType, "type", "",
 		"Backup destination type (Amazon | Google).")
-	cmd.Flag.StringVar(&n, "name", "",
+	cmd.Flag.StringVar(&name, "name", "",
 		"Name for the new backuo destination.")
-	cmd.Flag.StringVar(&fs, "folders", "",
-		"Comma or space-separated list of folders")
-	cmd.Flag.DurationVar(&fq, "frequency", time.Duration(0),
+	cmd.Flag.StringVar(&folders, "folders", "",
+		"Comma or space-separated list of folders.")
+	cmd.Flag.DurationVar(&freq, "frequency", time.Duration(0),
 		"Frequency at which to backup this destination.")
 	cmd.Flag.Parse(args[1:])
-	fmt.Println("User flags: ", dt, n, fs, fq)
 
-	// If not specified in a flag, prompt user for backup destination type
-	if dt == "" {
+	if destType == "" || name == "" || folders == "" || freq == time.Duration(0) {
 		reader := bufio.NewReader(os.Stdin)
-		color.Blue("Which type of backup destination would you like to add?")
-		color.Blue("	1. Amazon (S3 or Glacier)")
-		color.Blue("	2. Google Cloud")
-		fmt.Println("")
-		fmt.Print("Choose an option [1-2]: ")
-		text, _ := reader.ReadString('\n')
-		dt = strings.TrimSpace(text)
+
+		// If not specified in a flag, prompt user for backup destination type
+		if destType == "" {
+			userInputType(reader)
+		}
+
+		// If not specified in a flag, prompt user for backup name
+		if name == "" {
+			name = userInputName(reader)
+		}
+
+		// If not specified in a flag, prompt user for frequency
+		if freq == time.Duration(0) {
+			freq = userInputFrequency(reader)
+		}
 	}
 
-	switch strings.ToLower(dt) {
-	case "1", "amazon":
-		addAmazon()
-	case "2", "google":
+	// If not specified in a flag, prompt user for folders
+	var foldersList []string
+	if folders == "" {
+		reader := bufio.NewReader(os.Stdin)
+		foldersList = userInputFolders(reader)
+	} else {
+		foldersList = strings.Split(folders, ",")
+	}
+
+	switch strings.ToLower(destType) {
+	case "amazon":
+		addAmazon(name, foldersList, freq)
+	case "google":
 		addGoogle()
-	case "":
-		return
 	default:
 		color.Red("Invalid option, exiting")
 		os.Exit(1)
 	}
 }
 
-func addAmazon() {
-	config := stash.NewConfig()
-	reader := bufio.NewReader(os.Stdin)
+func addAmazon(name string, foldersList []string, freq time.Duration) {
+
 	confEntry := stash.ConfigEntry{
-		Name:        userInputName(reader, config),
-		Folders:     userInputFolders(reader),
+		Name:        name,
+		Folders:     foldersList,
 		Type:        "Amazon",
-		Credentials: userInputCredentials(reader),
-		Frequency:   userInputFrequency(reader),
+		Credentials: userInputCredentials(),
+		Frequency:   freq,
 	}
+
+	config := stash.NewConfig()
+	// Verify that name is not already taken:
+	verifyName(name, config)
 	if err := config.AddDestination(confEntry); err != nil {
 		color.Red("Fatal error adding backup destination: ", err)
 		os.Exit(1)
@@ -119,17 +134,39 @@ func addGoogle() {
 	return
 }
 
-func userInputName(reader *bufio.Reader, confFile *stash.Config) string {
+func userInputType(reader *bufio.Reader) string {
+	color.Blue("Which type of backup destination would you like to add?")
+	color.Blue("	1. Amazon (S3 or Glacier)")
+	color.Blue("	2. Google Cloud")
+	fmt.Println("")
+	fmt.Print("Choose an option [1-2]: ")
+	text, _ := reader.ReadString('\n')
+	destType := strings.TrimSpace(text)
+	switch destType {
+	case "1":
+		destType = "amazon"
+	case "2":
+		destType = "google"
+	default:
+		os.Exit(1)
+	}
+	return destType
+}
+
+func userInputName(reader *bufio.Reader) string {
 	fmt.Print("Specify a name for this destination: ")
 	text, _ := reader.ReadString('\n')
 	name := strings.TrimSpace(text)
+	return name
+}
+
+func verifyName(name string, confFile *stash.Config) {
 	if confFile.IsDuplicateEntry(stash.ConfigEntry{Name: name}) {
 		color.Red("Attempted to add duplicate entry [%s], "+
 			"if you were trying to add folders to an existing backup "+
 			"destination, use 'stash folder add'", name)
 		os.Exit(1)
 	}
-	return name
 }
 
 func userInputFolders(reader *bufio.Reader) []string {
@@ -160,7 +197,7 @@ func isValidDirectory(dir string) (bool, error) {
 	return true, nil
 }
 
-func userInputCredentials(reader *bufio.Reader) map[string]string {
+func userInputCredentials() map[string]string {
 	return map[string]string{"key": "supersecret"}
 }
 

@@ -1,9 +1,14 @@
-dependencies:
+machine:
   post:
     # install golint
     - go get github.com/golang/lint/golint
     # install gocyclo
     - go get github.com/fzipp/gocyclo
+    # install gox cross-compiler
+    - go get -u -f github.com/mitchellh/gox
+
+dependencies:
+  post:
     # install binaries
     - go install ./...
 
@@ -13,12 +18,17 @@ test:
     - "[ `git ls-files | grep '.go$' | xargs gofmt -l 2>&1 | wc -l` -eq 0 ]"
     # Vet and lint:
     - go vet ./...
-    - golint ./...
+    - "[ `golint ./... | wc -l` -eq 0 ]"
+    # Test that complexity of a single function isnt over 15
+    - gocyclo -over 15 .
   override:
     # Run unit tests
     - go test -v -race ./...
   post:
-    # Test that complexity of a single function isnt over 15
-    - gocyclo -over 15 .
     # Test that the stash binary basically runs:
     - /home/ubuntu/.go_project/bin/stash destination list
+    # cross-compile binaries
+    - gox -arch="amd64 386" -os="!windows" -osarch="!darwin/386" ./...
+    # Artifact binaries
+    - mkdir $CIRCLE_ARTIFACTS/stash && mv stash_* $CIRCLE_ARTIFACTS/stash
+    - mkdir $CIRCLE_ARTIFACTS/stashd && mv stashd_* $CIRCLE_ARTIFACTS/stashd

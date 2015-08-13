@@ -28,7 +28,8 @@ test:
     # Test that the stash binary basically runs:
     - /home/ubuntu/.go_project/bin/stash destination list
     # cross-compile binaries
-    - gox -arch="amd64 386" -os="!windows" -osarch="!darwin/386" ./...
+    - 'gox -arch="amd64 386" -os="!windows" -osarch="!darwin/386" -ldflags
+      "-X main.Version `git describe --tags --always`" ./...'
     # Artifact binaries
     - mkdir $CIRCLE_ARTIFACTS/stash && mv stash_* $CIRCLE_ARTIFACTS/stash
     - mkdir $CIRCLE_ARTIFACTS/stashd && mv stashd_* $CIRCLE_ARTIFACTS/stashd

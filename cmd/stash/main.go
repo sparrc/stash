@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -13,9 +14,20 @@ import (
 	"github.com/sparrc/stash/cmd/stash/subcmd"
 )
 
+// Version can be auto-set at build time using an ldflag
+//   go build -ldflags "-X main.Version `git describe --tags --always`" ./...
+var Version string
+
+var fversion = flag.Bool("version", false, "display the version")
+
 func main() {
 	flag.Usage = usageExit
 	flag.Parse()
+	if *fversion {
+		fmt.Printf("Stash: Version - %s\n", Version)
+		return
+	}
+
 	log.SetFlags(0)
 	log.SetPrefix("DEBUG: ")
 	args := flag.Args()

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -10,7 +12,19 @@ import (
 	"github.com/sparrc/stash"
 )
 
+// Version can be auto-set at build time using an ldflag
+//   go build -ldflags "-X main.Version `git describe --tags --always`" ./...
+var Version string
+
+var fversion = flag.Bool("version", false, "display the version")
+
 func main() {
+	flag.Parse()
+	if *fversion {
+		fmt.Printf("Stash Daemon: Version - %s\n", Version)
+		return
+	}
+
 	// How frequently to poll for backups
 	ticker := time.NewTicker(5 * time.Second)
 

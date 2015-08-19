@@ -24,7 +24,7 @@ test:
       "-X main.Version `git describe --tags --always`" ./...'
     # Test that the stash binary basically runs:
     - ./stash_linux_amd64 destination list
-    - ./stash_linux_amd64 --version
+    - ./stash_linux_amd64 --version | grep `git describe --always --tags`
   post:
     # Artifact binaries
     - mkdir $CIRCLE_ARTIFACTS/stash && mv stash_* $CIRCLE_ARTIFACTS/stash

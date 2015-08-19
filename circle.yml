@@ -7,11 +7,6 @@ machine:
     # install gox cross-compiler
     - go get -u -f github.com/mitchellh/gox
 
-dependencies:
-  post:
-    # install binaries
-    - go install ./...
-
 test:
   pre:
     # Verify that all files are go formatted:
@@ -24,12 +19,13 @@ test:
   override:
     # Run unit tests
     - go test -v -race ./...
-  post:
-    # Test that the stash binary basically runs:
-    - /home/ubuntu/.go_project/bin/stash destination list
     # cross-compile binaries
     - 'gox -arch="amd64 386" -os="!windows" -osarch="!darwin/386" -ldflags
       "-X main.Version `git describe --tags --always`" ./...'
+    # Test that the stash binary basically runs:
+    - ./stash_linux_amd64 destination list
+    - ./stash_linux_amd64 --version
+  post:
     # Artifact binaries
     - mkdir $CIRCLE_ARTIFACTS/stash && mv stash_* $CIRCLE_ARTIFACTS/stash
     - mkdir $CIRCLE_ARTIFACTS/stashd && mv stashd_* $CIRCLE_ARTIFACTS/stashd
